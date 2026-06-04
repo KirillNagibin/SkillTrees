@@ -255,7 +255,7 @@
                 "id": "mech_cons", "label": "Законы сохранения", "group": "locked",
                 "tasks": [
                     { "text": "Импульс: Векторное сложение, составление уравнений ЗСИ в проекциях", "completed": false },
-                    { "text": "Работа и Мощность: Расчет работы $A = Fs \\cos \\alpha$ и нахождение по графику $F(s)$", "completed": false },
+                    { "text": "Работа и Мощность: Расчет работы $A = Fs \\cos \\alpha$ and нахождение по графику $F(s)$", "completed": false },
                     { "text": "Энергия: Вычисление $E_k$, $E_p$ ($mgh$ и $\\frac{kx^2}{2}$), теорема об изменении $E_k$", "completed": false },
                     { "text": "ЗСЭ: Составление уравнений баланса энергии с учетом работы диссипативных сил ($\\Delta E = A$)", "completed": false }
                 ]
@@ -271,7 +271,7 @@
                 "id": "mech_osc", "label": "Механические колебания", "group": "locked",
                 "tasks": [
                     { "text": "Гармонические колебания: Анализ кинематических законов $x(t)$, нахождение сдвига фаз", "completed": false },
-                    { "text": "Маятники: Применение формул периода колебаний $T = 2\\pi\\sqrt{\\frac{l}{g}}$ и $T = 2\\pi\\sqrt{\\frac{m}{k}}$", "completed": false },
+                    { "text": "Маятники: Применение формул периода колебаний $T = 2\\pi\\sqrt{\\frac{l}{g}}$ and $T = 2\\pi\\sqrt{\\frac{m}{k}}$", "completed": false },
                     { "text": "Волны и Звук: Связь длины волны, частоты и скорости ($v = \\lambda\\nu$)", "completed": false }
                 ]
             },
@@ -395,7 +395,10 @@
     // ============================================================================
     // 3. ИНИЦИАЛИЗАЦИЯ И ЛОГИКА
     // ============================================================================
-    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Автоматическая нормализация URL-параметров при наличии лишних знаков '?'
+    const normalizedSearch = window.location.search.replace(/\?/g, '&').replace('&', '?');
+    const urlParams = new URLSearchParams(normalizedSearch);
     let studentId = urlParams.get('student');
     let isAdmin = urlParams.get('admin') === 'true';
 
@@ -442,11 +445,17 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data().progress;
                     applyProgress(data);
-                } else if (isAdmin) {
+                }
+                
+                if (!network) {
+                    initGraph();
+                }
+                
+                if (!docSnap.exists() && isAdmin) {
                     // Инициализация пустого профиля при первом входе админа
+                    // Теперь nodesData гарантированно создан
                     saveToFirebase();
                 }
-                if (!network) initGraph();
                 overlay.style.display = 'none';
             }, (error) => {
                 console.error("Ошибка чтения:", error);
@@ -460,18 +469,32 @@
     }
 
     function applyProgress(data) {
-        nodesData.get().forEach(node => {
+        // Сначала обновляем локальный SYLLABUS_DATA
+        SYLLABUS_DATA.nodes.forEach(node => {
             if (node.tasks && data[node.id]) {
                 node.tasks.forEach((task, index) => {
                     if (data[node.id][index] !== undefined) {
                         task.completed = data[node.id][index];
                     }
                 });
-                nodesData.update({ id: node.id, tasks: node.tasks });
             }
         });
-        calculateTreeStatus();
-        if (selectedNodeId) updateSidePanel(nodesData.get(selectedNodeId));
+
+        // Если nodesData уже инициализирован, синхронизируем изменения
+        if (nodesData) {
+            nodesData.get().forEach(node => {
+                if (node.tasks && data[node.id]) {
+                    node.tasks.forEach((task, index) => {
+                        if (data[node.id][index] !== undefined) {
+                            task.completed = data[node.id][index];
+                        }
+                    });
+                    nodesData.update({ id: node.id, tasks: node.tasks });
+                }
+            });
+            calculateTreeStatus();
+            if (selectedNodeId) updateSidePanel(nodesData.get(selectedNodeId));
+        }
     }
 
     async function saveToFirebase() {
@@ -480,7 +503,11 @@
         nodesData.get().forEach(node => {
             if (node.tasks) progress[node.id] = node.tasks.map(t => t.completed);
         });
-        await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
+        try {
+            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
+        } catch (error) {
+            console.error("Ошибка записи:", error);
+        }
     }
 
     function initGraph() {
