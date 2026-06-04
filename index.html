@@ -450,12 +450,6 @@
                 if (!network) {
                     initGraph();
                 }
-                
-                if (!docSnap.exists() && isAdmin) {
-                    // Инициализация пустого профиля при первом входе админа
-                    // Теперь nodesData гарантированно создан
-                    saveToFirebase();
-                }
                 overlay.style.display = 'none';
             }, (error) => {
                 console.error("Ошибка чтения:", error);
@@ -469,6 +463,8 @@
     }
 
     function applyProgress(data) {
+        if (!data) return;
+
         // Сначала обновляем локальный SYLLABUS_DATA
         SYLLABUS_DATA.nodes.forEach(node => {
             if (node.tasks && data[node.id]) {
@@ -484,12 +480,14 @@
         if (nodesData) {
             nodesData.get().forEach(node => {
                 if (node.tasks && data[node.id]) {
-                    node.tasks.forEach((task, index) => {
-                        if (data[node.id][index] !== undefined) {
-                            task.completed = data[node.id][index];
-                        }
+                    // Генерируем абсолютно новые ссылки на массивы и объекты для корректной реактивности vis.DataSet
+                    const updatedTasks = node.tasks.map((task, index) => {
+                        return {
+                            ...task,
+                            completed: data[node.id][index] !== undefined ? data[node.id][index] : task.completed
+                        };
                     });
-                    nodesData.update({ id: node.id, tasks: node.tasks });
+                    nodesData.update({ id: node.id, tasks: updatedTasks });
                 }
             });
             calculateTreeStatus();
@@ -588,8 +586,15 @@
         const node = nodesData.get(nodeId);
         if (!node || !node.tasks) return;
 
-        node.tasks[taskIndex].completed = !node.tasks[taskIndex].completed;
-        nodesData.update({ id: nodeId, tasks: node.tasks });
+        // Создаем абсолютно новые ссылки для корректной реактивности vis.DataSet
+        const updatedTasks = node.tasks.map((t, idx) => {
+            if (idx === taskIndex) {
+                return { ...t, completed: !t.completed };
+            }
+            return t;
+        });
+
+        nodesData.update({ id: nodeId, tasks: updatedTasks });
         
         calculateTreeStatus();
         updateSidePanel(nodesData.get(nodeId));
