@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дерево навыков: Физика 11 класс</title>
+    <title>Детальное дерево навыков: Физика 11 класс</title>
     
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     
@@ -221,26 +221,25 @@
         "nodes": [
             { "id": "physics11", "label": "Физика 11 класс", "group": "locked", "font": { "size": 20 } },
             
-            { "id": "osc_waves_branch", "label": "Колебания и ЭМВ", "group": "locked" },
-            { "id": "optics_branch", "label": "Оптика", "group": "locked" },
-            { "id": "quantum_atom_branch", "label": "Современная физика", "group": "locked" },
-            { "id": "nuclear_astro_branch", "label": "Ядро и Вселенная", "group": "locked" },
-            
-            // ЭМ КОЛЕБАНИЯ И ВОЛНЫ
+            // ЭЛЕКТРОМАГНИТНЫЕ КОЛЕБАНИЯ И ВОЛНЫ
             {
-                "id": "em_osc", "label": "ЭМ Колебания", "group": "locked",
+                "id": "em_osc", "label": "Электромагнитные колебания", "group": "locked",
                 "tasks": [
-                    { "text": "Колебательный контур, формула Томсона: $T=2\\pi\\sqrt{LC}$", "completed": false },
-                    { "text": "Энергия колебательного контура и резонанс", "completed": false },
-                    { "text": "Генераторы переменного тока", "completed": false }
+                    { "text": "Свободные колебания и параметры колебательного контура", "completed": false },
+                    { "text": "Амплитуда, период и частота. Формула Томсона: $T=2\\pi\\sqrt{LC}$", "completed": false },
+                    { "text": "Энергия колебательного контура и затухающие колебания в системах с сопротивлением", "completed": false },
+                    { "text": "Вынужденные ЭМ колебания, переменный ток и принципы работы генераторов", "completed": false },
+                    { "text": "Явление резонанса в колебательном контуре", "completed": false }
                 ]
             },
             {
                 "id": "em_waves", "label": "Электромагнитные волны", "group": "locked",
                 "tasks": [
-                    { "text": "Скорость ЭМВ ($c=3\\times 10^8$ м/с) и длина волны: $\\lambda=\\frac{c}{f}$", "completed": false },
-                    { "text": "Волновое уравнение, интерференция и дифракция ЭМВ", "completed": false },
-                    { "text": "Электромагнитный спектр (от радиоволн до гамма-излучения)", "completed": false }
+                    { "text": "Свойства волн и волновое уравнение", "completed": false },
+                    { "text": "Скорость волны ($c=3\\times10^8$ м/с) и расчет параметров: $\\lambda=\\frac{c}{f}$", "completed": false },
+                    { "text": "Интерференция и дифракция электромагнитных волн", "completed": false },
+                    { "text": "Анализ ЭМ спектра: радиоволны, микроволны, инфракрасное излучение", "completed": false },
+                    { "text": "Анализ высокочастотного спектра: видимый свет, ультрафиолет, рентген, гамма-излучение", "completed": false }
                 ]
             },
 
@@ -248,92 +247,117 @@
             {
                 "id": "opt_geom", "label": "Геометрическая оптика", "group": "locked",
                 "tasks": [
-                    { "text": "Закон преломления: $\\frac{\\sin\\alpha}{\\sin\\beta}=\\frac{n_2}{n_1}$", "completed": false },
-                    { "text": "Полное внутреннее отражение", "completed": false },
-                    { "text": "Оптическая сила ($D=\\frac{1}{F}$) и формула тонкой линзы: $\\frac{1}{F}=\\frac{1}{d}+\\frac{1}{f}$", "completed": false },
-                    { "text": "Глаз, коррекция зрения и оптические приборы", "completed": false }
+                    { "text": "Прямолинейное распространение света. Зеркальное и рассеянное отражение", "completed": false },
+                    { "text": "Построение изображений в плоском и сферическом зеркалах", "completed": false },
+                    { "text": "Закон преломления света Снеллиуса: $\\frac{\\sin\\alpha}{\\sin\\beta}=\\frac{n_2}{n_1}$", "completed": false },
+                    { "text": "Преломление в призме и явление полного внутреннего отражения", "completed": false },
+                    { "text": "Линзы (выпуклая/вогнутая), фокусное расстояние и оптическая сила: $D=\\frac{1}{F}$", "completed": false },
+                    { "text": "Построение изображений по формуле тонкой линзы: $\\frac{1}{F}=\\frac{1}{d}+\\frac{1}{f}$", "completed": false }
                 ]
             },
             {
-                "id": "opt_phys", "label": "Волновая оптика", "group": "locked",
+                "id": "opt_systems", "label": "Волновая оптика и приборы", "group": "locked",
                 "tasks": [
-                    { "text": "Природа света: корпускулярно-волновой дуализм", "completed": false },
-                    { "text": "Дисперсия света в призме", "completed": false }
+                    { "text": "Природа света: развитие волновой и корпускулярной теорий", "completed": false },
+                    { "text": "Дисперсия света", "completed": false },
+                    { "text": "Глаз как оптическая система, ошибки зрения и их коррекция", "completed": false },
+                    { "text": "Принципы работы приборов: фотоаппарат, проектор, микроскоп, телескоп, перископ", "completed": false }
                 ]
             },
 
-            // СОВРЕМЕННАЯ ФИЗИКА (СТО, Кванты, Атом, Твердое тело)
+            // СТО
             {
-                "id": "sto", "label": "Теория относительности (СТО)", "group": "locked",
+                "id": "sto", "label": "Специальная теория относительности", "group": "locked",
                 "tasks": [
-                    { "text": "Постулаты Эйнштейна, инвариантность $c$", "completed": false },
-                    { "text": "Релятивистское замедление времени и сокращение длины", "completed": false },
+                    { "text": "Постулаты СТО Эйнштейна и инвариантность скорости света", "completed": false },
+                    { "text": "Относительность одновременности", "completed": false },
+                    { "text": "Релятивистское замедление времени: $\\Delta t=\\frac{\\Delta t_0}{\\sqrt{1-\\frac{v^2}{c^2}}}$", "completed": false },
+                    { "text": "Релятивистское сокращение длины: $L=L_0\\sqrt{1-\\frac{v^2}{c^2}}$", "completed": false },
+                    { "text": "Релятивистская масса ($m=\\frac{m_0}{\\sqrt{1-\\frac{v^2}{c^2}}}$) и сложение скоростей", "completed": false },
                     { "text": "Эквивалентность массы и энергии: $E=mc^2$", "completed": false }
                 ]
             },
+
+            // КВАНТОВАЯ ФИЗИКА
             {
-                "id": "quantum", "label": "Квантовая физика", "group": "locked",
+                "id": "quantum_mechanics", "label": "Квантовая физика", "group": "locked",
                 "tasks": [
-                    { "text": "Фотоэффект, энергия и импульс фотона ($E=h\\nu$, $p=\\frac{h}{\\lambda}$)", "completed": false },
-                    { "text": "Уравнение Эйнштейна для фотоэффекта: $h\\nu=A+\\frac{mv^2}{2}$", "completed": false },
-                    { "text": "Гипотеза де Бройля ($\\lambda=\\frac{h}{p}$) и принцип неопределенности", "completed": false }
+                    { "text": "Тепловое излучение и закон Стефана-Больцмана", "completed": false },
+                    { "text": "Законы внешнего и внутреннего фотоэффекта", "completed": false },
+                    { "text": "Расчет энергии ($E=h\\nu$) и импульса ($p=\\frac{h}{\\lambda}$) фотона", "completed": false },
+                    { "text": "Уравнение Эйнштейна для фотоэффекта: $h\\nu=A+\\frac{mv^2}{2}$ и красная граница", "completed": false },
+                    { "text": "Волновые свойства частиц, гипотеза Де Бройля ($\\lambda=\\frac{h}{p}$) и дифракция электронов", "completed": false },
+                    { "text": "Принцип неопределенности Гейзенберга: $\\Delta x\\cdot\\Delta p\\ge\\frac{\\hbar}{2}$", "completed": false },
+                    { "text": "Корпускулярно-волновой дуализм", "completed": false }
                 ]
             },
+
+            // АТОМНАЯ ФИЗИКА И ТВЕРДОЕ ТЕЛО
             {
-                "id": "atom", "label": "Атомная физика", "group": "locked",
+                "id": "atom_physics", "label": "Атомная физика", "group": "locked",
                 "tasks": [
-                    { "text": "Опыты Резерфорда и постулаты Бора", "completed": false },
-                    { "text": "Линейчатые спектры, формула Бальмера", "completed": false },
-                    { "text": "Принцип работы лазеров", "completed": false }
+                    { "text": "Опыты Резерфорда, планетарная модель и постулаты Бора", "completed": false },
+                    { "text": "Энергетические уровни, линейчатые спектры и спектр атома водорода", "completed": false },
+                    { "text": "Формула Бальмера, абсорбция света и люминесценция", "completed": false },
+                    { "text": "Принцип работы и типы лазеров", "completed": false }
                 ]
             },
             {
                 "id": "solid_state", "label": "Физика твердого тела", "group": "locked",
                 "tasks": [
-                    { "text": "Зонная теория: проводники, диэлектрики, полупроводники", "completed": false },
-                    { "text": "Дырочная и электронная проводимость", "completed": false },
-                    { "text": "Полупроводниковые диоды и транзисторы", "completed": false }
+                    { "text": "Кристаллическая структура и типы решеток", "completed": false },
+                    { "text": "Зонная теория: металлы, полупроводники, диэлектрики", "completed": false },
+                    { "text": "Дырочная и электронная проводимость полупроводников. Проводимость металлов", "completed": false },
+                    { "text": "Полупроводниковые приборы: диод, транзистор", "completed": false },
+                    { "text": "Явление сверхпроводимости", "completed": false }
                 ]
             },
 
-            // ЯДРО И ВСЕЛЕННАЯ
+            // ЯДЕРНАЯ ФИЗИКА И ЭЛЕМЕНТАРНЫЕ ЧАСТИЦЫ
             {
-                "id": "nuclear", "label": "Ядерная физика", "group": "locked",
+                "id": "nuclear_physics", "label": "Ядерная физика", "group": "locked",
                 "tasks": [
-                    { "text": "Дефект массы и энергия связи: $E=\\Delta mc^2$", "completed": false },
-                    { "text": "Закон радиоактивного распада: $N=N_0e^{-\\lambda t}$", "completed": false },
-                    { "text": "Ядерные и термоядерные реакции, атомная энергетика", "completed": false },
-                    { "text": "Элементарные частицы (кварки, лептоны) и антивещество", "completed": false }
+                    { "text": "Строение ядра (протоны, нейтроны), изотопы и ядерные силы", "completed": false },
+                    { "text": "Расчет дефекта массы: $\\Delta m=Z m_p+(A-Z)m_n-m_{ядра}$", "completed": false },
+                    { "text": "Вычисление энергии связи ядра: $E=\\Delta m c^2$", "completed": false },
+                    { "text": "Закон радиоактивного распада $N=N_0e^{-\\lambda t}$ и период полураспада $T=\\frac{\\ln 2}{\\lambda}$", "completed": false },
+                    { "text": "Альфа-, бета- и гамма-распады", "completed": false },
+                    { "text": "Ядерные реакции: расщепление урана-235, цепная реакция, термоядерный синтез", "completed": false },
+                    { "text": "Принцип работы ядерного реактора и задачи атомной энергетики", "completed": false }
                 ]
             },
             {
-                "id": "astro", "label": "Астрофизика", "group": "locked",
+                "id": "particles", "label": "Элементарные частицы", "group": "locked",
                 "tasks": [
-                    { "text": "Строение Солнца и эволюция звезд", "completed": false },
-                    { "text": "Закон Хаббла ($v=Hr$) и расширение Вселенной", "completed": false },
-                    { "text": "Теория Большого взрыва", "completed": false }
+                    { "text": "Классификация частиц: кварки, лептоны, бозоны", "completed": false },
+                    { "text": "Понятие антивещества", "completed": false }
+                ]
+            },
+
+            // АСТРОФИЗИКА
+            {
+                "id": "astrophysics", "label": "Эволюция Вселенной", "group": "locked",
+                "tasks": [
+                    { "text": "Методы астрономических наблюдений, Солнечная система и строение Солнца", "completed": false },
+                    { "text": "Классификация звезд и их жизненный цикл (нейтронные звезды, черные дыры)", "completed": false },
+                    { "text": "Галактики и крупномасштабная структура Вселенной", "completed": false },
+                    { "text": "Расширение Вселенной и Закон Хаббла: $v=Hr$", "completed": false },
+                    { "text": "Теория Большого взрыва и оценка возраста Вселенной", "completed": false }
                 ]
             }
         ],
         "edges": [
-            { "from": "physics11", "to": "osc_waves_branch", "length": 250 }, 
-            { "from": "physics11", "to": "optics_branch", "length": 250 }, 
-            { "from": "physics11", "to": "quantum_atom_branch", "length": 250 }, 
-            { "from": "physics11", "to": "nuclear_astro_branch", "length": 250 },
-
-            { "from": "osc_waves_branch", "to": "em_osc", "length": 150 }, 
-            { "from": "osc_waves_branch", "to": "em_waves", "length": 150 }, 
-
-            { "from": "optics_branch", "to": "opt_geom", "length": 150 }, 
-            { "from": "optics_branch", "to": "opt_phys", "length": 150 }, 
-
-            { "from": "quantum_atom_branch", "to": "sto", "length": 150 }, 
-            { "from": "quantum_atom_branch", "to": "quantum", "length": 150 }, 
-            { "from": "quantum_atom_branch", "to": "atom", "length": 150 }, 
-            { "from": "quantum_atom_branch", "to": "solid_state", "length": 150 }, 
-
-            { "from": "nuclear_astro_branch", "to": "nuclear", "length": 150 }, 
-            { "from": "nuclear_astro_branch", "to": "astro", "length": 150 }
+            { "from": "physics11", "to": "em_osc", "length": 250 }, 
+            { "from": "physics11", "to": "em_waves", "length": 250 }, 
+            { "from": "physics11", "to": "opt_geom", "length": 250 }, 
+            { "from": "physics11", "to": "opt_systems", "length": 250 }, 
+            { "from": "physics11", "to": "sto", "length": 250 }, 
+            { "from": "physics11", "to": "quantum_mechanics", "length": 250 }, 
+            { "from": "physics11", "to": "atom_physics", "length": 250 }, 
+            { "from": "physics11", "to": "solid_state", "length": 250 }, 
+            { "from": "physics11", "to": "nuclear_physics", "length": 250 }, 
+            { "from": "physics11", "to": "particles", "length": 250 }, 
+            { "from": "physics11", "to": "astrophysics", "length": 250 }
         ]
     };
 
@@ -403,7 +427,7 @@
             });
             
         } catch (error) {
-            console.error("Ошибка инициализации Firebase:", error);
+            console.error("Ошибка initialization Firebase:", error);
             fallbackInit(); 
         }
     }
