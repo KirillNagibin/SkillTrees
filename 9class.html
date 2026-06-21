@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дерево навыков: Физика 9 класс</title>
+    
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+        #network-container {
+            width: 100%;
+            height: 100%;
+        }
+        #side-panel {
+            position: absolute;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+            transition: right 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #333;
+        }
+        #side-panel.open {
+            right: 0;
+        }
+        .panel-title {
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .panel-status {
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .panel-desc {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #b0b0b0;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .panel-desc::-webkit-scrollbar { width: 4px; }
+        .panel-desc::-webkit-scrollbar-thumb { background-color: #555; border-radius: 2px; }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.2em;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            transition: color 0.2s;
+        }
+        .close-btn:hover { color: #fff; }
+        .status-completed { color: #81c784; }
+        .status-in_progress { color: #ffd54f; }
+        .status-locked { color: #888888; }
+        .status-lost { color: #EF4444; }
+        
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .task-item { margin-bottom: 16px; }
+        
+        .task-label {
+            display: flex;
+            align-items: flex-start;
+            font-size: 0.95em;
+            position: relative;
+            cursor: default;
+        }
+        .task-label.interactive { cursor: pointer; }
+        
+        .task-status-btn {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #444;
+            border-radius: 4px;
+            margin-right: 12px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            background-color: #2a2a2a;
+            user-select: none;
+        }
+        .task-label.interactive:hover .task-status-btn.state-none { border-color: #888; }
+        
+        .task-status-btn.state-completed {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+        .task-status-btn.state-lost {
+            background-color: #EF4444;
+            border-color: #EF4444;
+            color: white;
+        }
+        
+        .task-text {
+            line-height: 1.5;
+            display: inline;
+            word-break: break-word;
+            transition: color 0.2s;
+        }
+        .text-completed { color: #81c784; font-weight: 500; }
+        .text-pending { color: #888888; }
+        .text-lost { color: #EF4444; font-weight: 500; }
+        
+        mjx-container[jax="SVG"] { color: inherit !important; }
+
+        #admin-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #1e1e1e;
+            border: 1px solid #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #system-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+<div id="system-overlay">Инициализация...</div>
+
+<div id="network-container"></div>
+
+<div id="side-panel">
+    <button class="close-btn" onclick="closePanel()">✕</button>
+    <h2 id="sp-title" class="panel-title">Название</h2>
+    <div id="sp-status" class="panel-status">Статус: ...</div>
+    <div id="sp-desc" class="panel-desc">Описание.</div>
+</div>
+
+<div id="admin-panel">
+    <h3 style="margin-top:0; font-size: 1em; color: #4CAF50;">Режим преподавателя</h3>
+    <p id="admin-student-name" style="font-size: 0.8em; color: #bbb; margin: 5px 0 0 0;"></p>
+    <p style="font-size: 0.8em; color: #888; margin: 5px 0 0 0;">Изменения сохраняются автоматически.</p>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAzMNW7xdVazEUnJiKoYPN8laMWD1BZqCw",
+        authDomain: "physicsskilltree.firebaseapp.com",
+        projectId: "physicsskilltree",
+        storageBucket: "physicsskilltree.firebasestorage.app",
+        messagingSenderId: "414823459706",
+        appId: "1:414823459706:web:80e86f596c6e9f2c4704c3"
+    };
+
+    const SYLLABUS_DATA = {
+        "nodes": [
+            { "id": "physics9", "label": "Физика 9 класс", "group": "locked", "font": { "size": 20 } },
+            
+            { "id": "mech_branch", "label": "Механика", "group": "locked" },
+            { "id": "osc_branch", "label": "Колебания и волны", "group": "locked" },
+            { "id": "em_branch", "label": "Электромагнитное поле", "group": "locked" },
+            { "id": "quantum_branch", "label": "Квантовые явления", "group": "locked" },
+            
+            // МЕХАНИКА
+            {
+                "id": "mech_kin", "label": "Кинематика", "group": "locked",
+                "tasks": [
+                    { "text": "Система отсчета, траектория, путь и перемещение", "completed": false },
+                    { "text": "Равноускоренное движение: $v=v_0+at$, $s=v_0t+\\frac{at^2}{2}$", "completed": false },
+                    { "text": "Анализ графиков скорости, координаты и пути от времени", "completed": false },
+                    { "text": "Свободное падение и движение тела по вертикали ($g$)", "completed": false },
+                    { "text": "Движение по окружности, центростремительное ускорение: $a=\\frac{v^2}{R}$", "completed": false }
+                ]
+            },
+            {
+                "id": "mech_dyn", "label": "Динамика", "group": "locked",
+                "tasks": [
+                    { "text": "Законы Ньютона: инерция, $F=ma$, третий закон", "completed": false },
+                    { "text": "Сила упругости (Закон Гука): $F=-kx$", "completed": false },
+                    { "text": "Закон всемирного тяготения: $F=G\\frac{m_1m_2}{r^2}$", "completed": false },
+                    { "text": "Ускорение свободного падения на разных планетах", "completed": false },
+                    { "text": "Сила трения скольжения и коэффициент трения", "completed": false }
+                ]
+            },
+            {
+                "id": "mech_cons", "label": "Законы сохранения", "group": "locked",
+                "tasks": [
+                    { "text": "Импульс тела и импульс силы", "completed": false },
+                    { "text": "Закон сохранения импульса: $m_1v_1+m_2v_2=m_1v_1'+m_2v_2'$", "completed": false },
+                    { "text": "Реактивное движение", "completed": false }
+                ]
+            },
+
+            // КОЛЕБАНИЯ И ВОЛНЫ
+            {
+                "id": "osc_mech", "label": "Механические колебания", "group": "locked",
+                "tasks": [
+                    { "text": "Параметры: амплитуда, период, частота ($T=\\frac{1}{f}$)", "completed": false },
+                    { "text": "Гармонические колебания: пружинный и математический маятник", "completed": false },
+                    { "text": "Период математического маятника: $T=2\\pi\\sqrt{\\frac{l}{g}}$", "completed": false },
+                    { "text": "Превращения энергии при колебаниях. Резонанс", "completed": false },
+                    { "text": "Затухающие и вынужденные колебания", "completed": false }
+                ]
+            },
+            {
+                "id": "osc_waves", "label": "Волны и звук", "group": "locked",
+                "tasks": [
+                    { "text": "Механические волны, длина волны: $\\lambda=vT$", "completed": false },
+                    { "text": "Звуковые волны: высота, громкость, скорость в средах", "completed": false },
+                    { "text": "Отражение звука, удар эха", "completed": false }
+                ]
+            },
+
+            // ЭЛЕКТРОМАГНИТНОЕ ПОЛЕ
+            {
+                "id": "em_mag", "label": "Магнитное поле", "group": "locked",
+                "tasks": [
+                    { "text": "Свойства магнитного поля, магнитные линии", "completed": false },
+                    { "text": "Правило правой руки (буравчика) для прямого тока и катушки", "completed": false },
+                    { "text": "Устройство электромагнита, магнитное поле Земли", "completed": false }
+                ]
+            },
+            {
+                "id": "em_force", "label": "Действие магнитного поля", "group": "locked",
+                "tasks": [
+                    { "text": "Сила Ампера: $F=BIl\\sin\\alpha$, электродвигатель", "completed": false },
+                    { "text": "Сила Лоренца: действие на движущуюся заряженную частицу", "completed": false }
+                ]
+            },
+            {
+                "id": "em_ind", "label": "Электромагнитная индукция", "group": "locked",
+                "tasks": [
+                    { "text": "Опыт Фарадея, правило Ленца", "completed": false },
+                    { "text": "Закон электромагнитной индукции: $\\mathcal{E}=-\\frac{\\Delta\\Phi}{\\Delta t}$", "completed": false },
+                    { "text": "Вихревое электрическое поле, генератор, переменный ток", "completed": false }
+                ]
+            },
+            {
+                "id": "em_waves", "label": "Электромагнитные волны", "group": "locked",
+                "tasks": [
+                    { "text": "Характеристики ЭМ волн, скорость: $c=3\\times10^8$ м/с", "completed": false },
+                    { "text": "Связь параметров волны: $\\lambda=\\frac{c}{f}$", "completed": false },
+                    { "text": "Принципы радиосвязи и телевидения", "completed": false }
+                ]
+            },
+
+            // КВАНТОВЫЕ ЯВЛЕНИЯ
+            {
+                "id": "q_radio", "label": "Радиоактивность", "group": "locked",
+                "tasks": [
+                    { "text": "Виды радиоактивного распада ($\\alpha$, $\\beta$, $\\gamma$)", "completed": false },
+                    { "text": "Закон радиоактивного распада, период полураспада", "completed": false },
+                    { "text": "Биологическое действие радиации и радиационная защита", "completed": false }
+                ]
+            },
+            {
+                "id": "q_atom", "label": "Строение атома", "group": "locked",
+                "tasks": [
+                    { "text": "Планетарная модель Резерфорда", "completed": false },
+                    { "text": "Квантовая модель атома Бора, энергетические уровни", "completed": false },
+                    { "text": "Спектральный анализ, изотопы", "completed": false }
+                ]
+            },
+            {
+                "id": "q_nucl", "label": "Ядерные реакции", "group": "locked",
+                "tasks": [
+                    { "text": "Составление уравнений ядерных реакций", "completed": false },
+                    { "text": "Расщепление ядра урана, цепная реакция, ядерный реактор", "completed": false },
+                    { "text": "Энергия связи: $E=mc^2$, атомная энергетика", "completed": false }
+                ]
+            }
+        ],
+        "edges": [
+            { "from": "physics9", "to": "mech_branch", "length": 250 }, 
+            { "from": "physics9", "to": "osc_branch", "length": 250 }, 
+            { "from": "physics9", "to": "em_branch", "length": 250 }, 
+            { "from": "physics9", "to": "quantum_branch", "length": 250 },
+
+            { "from": "mech_branch", "to": "mech_kin", "length": 150 }, 
+            { "from": "mech_branch", "to": "mech_dyn", "length": 150 }, 
+            { "from": "mech_branch", "to": "mech_cons", "length": 150 }, 
+
+            { "from": "osc_branch", "to": "osc_mech", "length": 150 }, 
+            { "from": "osc_branch", "to": "osc_waves", "length": 150 }, 
+
+            { "from": "em_branch", "to": "em_mag", "length": 150 }, 
+            { "from": "em_branch", "to": "em_force", "length": 150 }, 
+            { "from": "em_branch", "to": "em_ind", "length": 150 }, 
+            { "from": "em_branch", "to": "em_waves", "length": 150 }, 
+
+            { "from": "quantum_branch", "to": "q_radio", "length": 150 }, 
+            { "from": "quantum_branch", "to": "q_atom", "length": 150 }, 
+            { "from": "quantum_branch", "to": "q_nucl", "length": 150 }
+        ]
+    };
+
+    SYLLABUS_DATA.nodes.forEach(node => {
+        if (node.tasks) {
+            node.tasks.forEach(task => {
+                if (!task.status) {
+                    task.status = task.completed ? 'completed' : 'none';
+                }
+            });
+        }
+    });
+    
+    const normalizedSearch = window.location.search.replace(/\?/g, '&').replace('&', '?');
+    const urlParams = new URLSearchParams(normalizedSearch);
+    let studentId = urlParams.get('student');
+    let isAdmin = urlParams.get('admin') === 'true';
+
+    if (!studentId) {
+        studentId = 'demo_student_9class';
+        isAdmin = true;
+    }
+
+    const overlay = document.getElementById('system-overlay');
+
+    if (isAdmin) {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-student-name').innerText = `Редактирование профиля: ${studentId}`;
+    }
+
+    let db;
+    let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
+    let edgesData = new vis.DataSet(SYLLABUS_DATA.edges);
+    let network;
+    let selectedNodeId = null;
+
+    async function initFirebase() {
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+            overlay.style.display = 'none';
+            initGraph();
+            return;
+        }
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            db = getFirestore(app);
+
+            await signInAnonymously(auth);
+            
+            const docRef = doc(db, "students", studentId);
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data().progress;
+                    applyProgress(data);
+                }
+                
+                if (!network) {
+                    initGraph();
+                }
+                overlay.style.display = 'none';
+            }, (error) => {
+                console.error("Ошибка чтения:", error);
+                overlay.innerHTML = "Ошибка доступа к Firebase. Проверьте Security Rules.";
+            });
+            
+        } catch (error) {
+            console.error(error);
+            overlay.innerHTML = "Ошибка инициализации Firebase.";
+        }
+    }
+
+    function applyProgress(data) {
+        if (!data) return;
+
+        if (nodesData) {
+            nodesData.get().forEach(node => {
+                if (node.tasks && data[node.id]) {
+                    const updatedTasks = node.tasks.map((task, index) => {
+                        const savedVal = data[node.id][index];
+                        let newStatus = 'none';
+                        
+                        if (typeof savedVal === 'boolean') {
+                            newStatus = savedVal ? 'completed' : 'none';
+                        } else if (typeof savedVal === 'string') {
+                            newStatus = savedVal;
+                        }
+
+                        return {
+                            ...task,
+                            status: newStatus,
+                            completed: newStatus === 'completed'
+                        };
+                    });
+                    nodesData.update({ id: node.id, tasks: updatedTasks });
+                }
+            });
+            calculateTreeStatus();
+            if (selectedNodeId) updateSidePanel(nodesData.get(selectedNodeId));
+        }
+    }
+
+    async function saveToFirebase() {
+        if (!db) return;
+        const progress = {};
+        nodesData.get().forEach(node => {
+            if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
+        });
+        try {
+            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
+        } catch (error) {
+            console.error("Ошибка записи:", error);
+        }
+    }
+
+    function initGraph() {
+        const container = document.getElementById('network-container');
+        const data = { nodes: nodesData, edges: edgesData };
+
+        const options = {
+            nodes: {
+                shape: 'box', margin: { top: 12, bottom: 12, left: 16, right: 16 }, 
+                shapeProperties: { borderRadius: 6 }, borderWidth: 2, font: { face: 'Segoe UI', size: 14 }
+            },
+            edges: { width: 2, color: { color: '#444444', highlight: '#ffffff' }, smooth: false },
+            groups: {
+                completed: { color: { background: '#1a3320', border: '#4CAF50', highlight: { background: '#254a2e', border: '#66bb6a' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(76, 175, 80, 0.4)', size: 15, x: 0, y: 0 } },
+                in_progress: { color: { background: '#332a00', border: '#FFC107', highlight: { background: '#4d4000', border: '#ffca28' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: [5, 5] }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.15)', size: 10, x: 0, y: 0 } },
+                lost: { color: { background: '#3d1616', border: '#EF4444', highlight: { background: '#4d1c1c', border: '#f87171' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(239, 68, 68, 0.4)', size: 15, x: 0, y: 0 } },
+                locked: { color: { background: '#1e1e1e', border: '#333333', highlight: { background: '#2a2a2a', border: '#555555' } }, font: { color: '#777777' }, shapeProperties: { borderDashes: false }, shadow: false }
+            },
+            physics: { forceAtlas2Based: { gravitationalConstant: -220, centralGravity: 0.005, springLength: 150, springConstant: 0.12 }, maxVelocity: 50, solver: 'forceAtlas2Based', timestep: 0.35, stabilization: { iterations: 150 } }
+        };
+
+        network = new vis.Network(container, data, options);
+        calculateTreeStatus();
+
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                selectedNodeId = params.nodes[0];
+                updateSidePanel(nodesData.get(selectedNodeId));
+                document.getElementById('side-panel').classList.add('open');
+            } else {
+                window.closePanel();
+            }
+        });
+    }
+
+    function calculateTreeStatus() {
+        const allEdges = edgesData.get();
+        const parentMap = {};
+        allEdges.forEach(e => {
+            if (!parentMap[e.from]) parentMap[e.from] = [];
+            parentMap[e.from].push(e.to);
+        });
+
+        function evalNode(nodeId) {
+            const children = parentMap[nodeId];
+            const node = nodesData.get(nodeId);
+            
+            if (!children || children.length === 0) {
+                if (node.tasks) {
+                    const total = node.tasks.length;
+                    const lostCount = node.tasks.filter(t => t.status === 'lost').length;
+                    const completedCount = node.tasks.filter(t => t.status === 'completed').length;
+                    
+                    let newGroup = 'locked';
+                    if (lostCount > 0) newGroup = 'lost';
+                    else if (completedCount === total && total > 0) newGroup = 'completed';
+                    else if (completedCount > 0) newGroup = 'in_progress';
+                    
+                    if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
+                }
+                return;
+            }
+
+            let allCompleted = true; 
+            let allLocked = true;
+            let anyLost = false;
+
+            children.forEach(childId => {
+                evalNode(childId); 
+                const childNode = nodesData.get(childId);
+                if (childNode.group === 'lost') anyLost = true;
+                if (childNode.group !== 'completed') allCompleted = false;
+                if (childNode.group !== 'locked') allLocked = false;
+            });
+
+            let newGroup = 'locked';
+            if (anyLost) newGroup = 'lost';
+            else if (allCompleted) newGroup = 'completed';
+            else if (!allLocked) newGroup = 'in_progress';
+
+            if (node.group !== newGroup) nodesData.update({ id: nodeId, group
