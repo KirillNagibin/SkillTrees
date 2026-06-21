@@ -549,4 +549,90 @@
             else if (allCompleted) newGroup = 'completed';
             else if (!allLocked) newGroup = 'in_progress';
 
-            if (node.group !== newGroup) nodesData.update({ id: nodeId, group
+            if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
+        }
+        
+        evalNode('physics9'); 
+    }
+
+    window.handleTaskToggle = function(nodeId, taskIndex) {
+        if (!isAdmin) return;
+        const node = nodesData.get(nodeId);
+        if (!node || !node.tasks) return;
+
+        const task = node.tasks[taskIndex];
+        const states = ['none', 'completed', 'lost'];
+        const currentIndex = states.indexOf(task.status || 'none');
+        const nextState = states[(currentIndex + 1) % states.length];
+
+        const updatedTasks = node.tasks.map((t, idx) => {
+            if (idx === taskIndex) {
+                return { ...t, status: nextState, completed: nextState === 'completed' };
+            }
+            return t;
+        });
+
+        nodesData.update({ id: nodeId, tasks: updatedTasks });
+        
+        calculateTreeStatus();
+        updateSidePanel(nodesData.get(nodeId));
+        saveToFirebase();
+    };
+
+    function updateSidePanel(nodeData) {
+        const spTitle = document.getElementById('sp-title');
+        const spStatus = document.getElementById('sp-status');
+        const spDesc = document.getElementById('sp-desc');
+
+        spTitle.innerText = nodeData.label;
+        spStatus.className = 'panel-status';
+        
+        if (nodeData.group === 'completed') {
+            spStatus.innerText = 'Статус: Изучено'; spStatus.classList.add('status-completed');
+        } else if (nodeData.group === 'lost') {
+            spStatus.innerText = 'Статус: Требует повторения'; spStatus.classList.add('status-lost');
+        } else if (nodeData.group === 'in_progress') {
+            spStatus.innerText = 'Статус: В процессе'; spStatus.classList.add('status-in_progress');
+        } else {
+            spStatus.innerText = 'Статус: Заблокировано'; spStatus.classList.add('status-locked');
+        }
+        
+        let descHtml = "";
+        if (nodeData.tasks && nodeData.tasks.length > 0) {
+            descHtml += '<ul class="task-list">';
+            nodeData.tasks.forEach((task, index) => {
+                const status = task.status || 'none';
+                const interactiveClass = isAdmin ? 'interactive' : '';
+                
+                let icon = '';
+                if (status === 'completed') icon = '✓';
+                else if (status === 'lost') icon = '✕';
+
+                descHtml += `
+                    <li class="task-item">
+                        <div class="task-label ${interactiveClass}" onclick="${interactiveClass ? `window.handleTaskToggle('${nodeData.id}', ${index})` : ''}">
+                            <div class="task-status-btn state-${status}">${icon}</div>
+                            <span class="task-text text-${status}">${task.text}</span>
+                        </div>
+                    </li>
+                `;
+            });
+            descHtml += '</ul>';
+        } else {
+            descHtml = "Сборный узел. Статус зависит от дочерних тем.";
+        }
+        
+        spDesc.innerHTML = descHtml;
+        if (window.MathJax) MathJax.typesetPromise([spDesc]).catch(err => console.error(err));
+    }
+
+    window.closePanel = function() {
+        document.getElementById('side-panel').classList.remove('open');
+        selectedNodeId = null;
+    }
+
+    initFirebase();
+</script>
+
+</body>
+</html>
