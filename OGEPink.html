@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дерево навыков ОГЭ: Светлая схема</title>
+    
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff0f3;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: #4a3538;
+        }
+        #network-container {
+            width: 100%;
+            height: 100%;
+        }
+        #side-panel {
+            position: absolute;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background-color: #ffe5ec;
+            color: #4a3538;
+            box-shadow: -2px 0 10px rgba(255, 182, 193, 0.3);
+            transition: right 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #ffccd5;
+        }
+        #side-panel.open {
+            right: 0;
+        }
+        .panel-title {
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #4a3538;
+            font-weight: 600;
+        }
+        .panel-status {
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .panel-desc {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #61464b;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .panel-desc::-webkit-scrollbar { width: 4px; }
+        .panel-desc::-webkit-scrollbar-thumb { background-color: #ffccd5; border-radius: 2px; }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #a3858a;
+            font-size: 1.2em;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            transition: color 0.2s;
+        }
+        .close-btn:hover { color: #4a3538; }
+        .status-completed { color: #2e7d32; }
+        .status-in_progress { color: #b78103; }
+        .status-locked { color: #8c6f74; }
+        .status-lost { color: #c62828; }
+        
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            border-top: 1px solid #ffccd5;
+            padding-top: 20px;
+        }
+        .task-item { margin-bottom: 16px; }
+        
+        .task-label {
+            display: flex;
+            align-items: flex-start;
+            font-size: 0.95em;
+            position: relative;
+            cursor: default;
+        }
+        .task-label.interactive { cursor: pointer; }
+        
+        .task-status-btn {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffccd5;
+            border-radius: 4px;
+            margin-right: 12px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            background-color: #fff;
+            user-select: none;
+        }
+        .task-label.interactive:hover .task-status-btn.state-none { border-color: #ff85a2; }
+        
+        .task-status-btn.state-completed {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+        .task-status-btn.state-lost {
+            background-color: #EF4444;
+            border-color: #EF4444;
+            color: white;
+        }
+        
+        .task-text {
+            line-height: 1.5;
+            display: inline;
+            word-break: break-word;
+            transition: color 0.2s;
+        }
+        .text-completed { color: #2e7d32; font-weight: 500; }
+        .text-pending { color: #8c6f74; }
+        .text-lost { color: #c62828; font-weight: 500; }
+        
+        mjx-container[jax="SVG"] { color: inherit !important; }
+
+        #admin-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #ffe5ec;
+            border: 1px solid #ff85a2;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100;
+            color: #4a3538;
+            box-shadow: 0 4px 12px rgba(255, 133, 162, 0.2);
+        }
+        #system-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff0f3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-family: monospace;
+            font-size: 1.2em;
+            color: #4a3538;
+        }
+    </style>
+</head>
+<body>
+
+<div id="system-overlay">Инициализация...</div>
+
+<div id="network-container"></div>
+
+<div id="side-panel">
+    <button class="close-btn" onclick="closePanel()">✕</button>
+    <h2 id="sp-title" class="panel-title">Название</h2>
+    <div id="sp-status" class="panel-status">Статус: ...</div>
+    <div id="sp-desc" class="panel-desc">Описание.</div>
+</div>
+
+<div id="admin-panel">
+    <h3 style="margin-top:0; font-size: 1em; color: #ff5c8a;">Режим преподавателя</h3>
+    <p id="admin-student-name" style="font-size: 0.8em; color: #7a5c61; margin: 5px 0 0 0;"></p>
+    <p style="font-size: 0.8em; color: #9c787e; margin: 5px 0 0 0;">Изменения сохраняются автоматически.</p>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAzMNW7xdVazEUnJiKoYPN8laMWD1BZqCw",
+        authDomain: "physicsskilltree.firebaseapp.com",
+        projectId: "physicsskilltree",
+        storageBucket: "physicsskilltree.firebasestorage.app",
+        messagingSenderId: "414823459706",
+        appId: "1:414823459706:web:80e86f596c6e9f2c4704c3"
+    };
+
+    const SYLLABUS_DATA = {
+        "nodes": [
+            { "id": "oge_physics", "label": "ОГЭ Физика", "group": "locked", "font": { "size": 20 } },
+            
+            { "id": "mech_branch", "label": "Механические явления", "group": "locked" },
+            { "id": "thermal_branch", "label": "Тепловые явления", "group": "locked" },
+            { "id": "em_branch", "label": "Электромагнитные явления", "group": "locked" },
+            { "id": "quantum_branch", "label": "Квантовые явления", "group": "locked" },
+            { "id": "nuclear_branch", "label": "Ядерная физика", "group": "locked" },
+            
+            // МЕХАНИЧЕСКИЕ ЯВЛЕНИЯ
+            {
+                "id": "mech_kin", "label": "Кинематика", "group": "locked",
+                "tasks": [
+                    { "text": "Траектория, путь, перемещение и механическое движение", "completed": false },
+                    { "text": "Равномерное движение и скорость: $v = \\frac{s}{t}$", "completed": false },
+                    { "text": "Ускорение и равноускоренное движение: $v = v_0 + at$, $s = v_0t + \\frac{at^2}{2}$", "completed": false },
+                    { "text": "Свободное падение ($g$) и равномерное движение по окружности", "completed": false }
+                ]
+            },
+            {
+                "id": "mech_dyn", "label": "Динамика и Силы", "group": "locked",
+                "tasks": [
+                    { "text": "Инерция и Первый закон Ньютона", "completed": false },
+                    { "text": "Второй ($F = ma$) и Третий законы Ньютона", "completed": false },
+                    { "text": "Масса, плотность вещества ($\\rho = \\frac{m}{V}$) и измерение масс", "completed": false },
+                    { "text": "Сила упругости (Закон Гука $F = k\\Delta x$) и сила трения", "completed": false },
+                    { "text": "Закон всемирного тяготения и расчет силы тяжести", "completed": false },
+                    { "text": "Сложение сил и расчет равнодействующей силы", "completed": false }
+                ]
+            },
+            {
+                "id": "mech_laws", "label": "Законы сохранения и Статика", "group": "locked",
+                "tasks": [
+                    { "text": "Импульс тела ($p = mv$) и закон сохранения импульса", "completed": false },
+                    { "text": "Механическая работа ($A = Fs$) and мощность ($P = \\frac{A}{t}$)", "completed": false },
+                    { "text": "Кинетическая ($E_k = \\frac{mv^2}{2}$) и потенциальная ($E_p = mgh$) энергия", "completed": false },
+                    { "text": "Закон сохранения механической энергии", "completed": false },
+                    { "text": "Простые механизмы (рычаг, блок) и расчет КПД", "completed": false }
+                ]
+            },
+            {
+                "id": "mech_fluids_waves", "label": "Гидростатика и Волны", "group": "locked",
+                "tasks": [
+                    { "text": "Давление твердых тел ($p = \\frac{F}{S}$) и атмосферное давление", "completed": false },
+                    { "text": "Закон Паскаля и Закон Архимеда ($F_A = \\rho g V$)", "completed": false },
+                    { "text": "Механические колебания, волны и характеристики звука", "completed": false }
+                ]
+            },
+
+            // ТЕПЛОВЫЕ ЯВЛЕНИЯ
+            {
+                "id": "th_mkt", "label": "Строение вещества и Теплопередача", "group": "locked",
+                "tasks": [
+                    { "text": "Модели строения газов, жидкостей и твердых тел", "completed": false },
+                    { "text": "Тепловое движение, диффузия и Броуновское движение", "completed": false },
+                    { "text": "Понятие теплового равновесия и внутренней энергии", "completed": false },
+                    { "text": "Виды теплопередачи: теплопроводность, конвекция, излучение", "completed": false }
+                ]
+            },
+            {
+                "id": "th_processes", "label": "Термодинамические процессы", "group": "locked",
+                "tasks": [
+                    { "text": "Количество теплоты при нагревании: $Q = cm\\Delta T$", "completed": false },
+                    { "text": "Удельная теплоемкость и закон сохранения энергии в тепловых процессах", "completed": false },
+                    { "text": "Испарение, конденсация и кипение жидкостей", "completed": false },
+                    { "text": "Относительная и абсолютная влажность воздуха", "completed": false },
+                    { "text": "Плавление, кристаллизация и преобразование энергии в тепловых машинах", "completed": false }
+                ]
+            },
+
+            // ЭЛЕКТРОМАГНИТНЫЕ ЯВЛЕНИЯ
+            {
+                "id": "em_electrostatics", "label": "Электростатика", "group": "locked",
+                "tasks": [
+                    { "text": "Электризация тел, два рода зарядов и их взаимодействие", "completed": false },
+                    { "text": "Закон сохранения электрического заряда", "completed": false },
+                    { "text": "Электрическое поле, свойства проводников и диэлектриков", "completed": false }
+                ]
+            },
+            {
+                "id": "em_dc", "label": "Постоянный ток", "group": "locked",
+                "tasks": [
+                    { "text": "Условия существования тока, сила тока ($I = \\frac{q}{t}$) и напряжение", "completed": false },
+                    { "text": "Электрическое сопротивление проводника", "completed": false },
+                    { "text": "Закон Ома для участка цепи: $I = \\frac{U}{R}$", "completed": false },
+                    { "text": "Расчет последовательного и параллельного соединения проводников", "completed": false },
+                    { "text": "Работа, мощность тока и Закон Джоуля-Ленца ($Q = I^2Rt$)", "completed": false }
+                ]
+            },
+            {
+                "id": "em_magnetism", "label": "Магнитное поле и Индукция", "group": "locked",
+                "tasks": [
+                    { "text": "Опыт Эрстеда, магнитное поле тока и взаимодействие магнитов", "completed": false },
+                    { "text": "Действие магнитного поля на проводник с током", "completed": false },
+                    { "text": "Электромагнитная индукция и опыты Фарадея", "completed": false },
+                    { "text": "Электромагнитные колебания и волны", "completed": false }
+                ]
+            },
+            {
+                "id": "em_optics", "label": "Оптика", "group": "locked",
+                "tasks": [
+                    { "text": "Закон прямолинейного распространения и закон отражения света", "completed": false },
+                    { "text": "Плоское зеркало и построение изображений", "completed": false },
+                    { "text": "Преломление света и явление дисперсии", "completed": false },
+                    { "text": "Тонкие линзы, фокусное расстояние и оптические приборы", "completed": false },
+                    { "text": "Глаз как оптическая система", "completed": false }
+                ]
+            },
+
+            // КВАНТОВЫЕ ЯВЛЕНИЯ
+            {
+                "id": "quantum_atoms", "label": "Атомная физика", "group": "locked",
+                "tasks": [
+                    { "text": "Опыты Резерфорда и планетарная модель атома", "completed": false },
+                    { "text": "Квантовая теория и линейчатые спектры", "completed": false }
+                ]
+            },
+
+            // ЯДЕРНАЯ ФИЗИКА
+            {
+                "id": "nuclear_physics", "label": "Ядерные процессы", "group": "locked",
+                "tasks": [
+                    { "text": "Состав атомного ядра: протоны и нейтроны", "completed": false },
+                    { "text": "Явление радиоактивности, виды излучений ($\\alpha, \\beta, \\gamma$)", "completed": false },
+                    { "text": "Составление уравнений ядерных реакций", "completed": false }
+                ]
+            }
+        ],
+        "edges": [
+            { "from": "oge_physics", "to": "mech_branch", "length": 250 }, 
+            { "from": "oge_physics", "to": "thermal_branch", "length": 250 }, 
+            { "from": "oge_physics", "to": "em_branch", "length": 250 }, 
+            { "from": "oge_physics", "to": "quantum_branch", "length": 250 },
+            { "from": "oge_physics", "to": "nuclear_branch", "length": 250 },
+
+            { "from": "mech_branch", "to": "mech_kin", "length": 150 }, 
+            { "from": "mech_branch", "to": "mech_dyn", "length": 150 }, 
+            { "from": "mech_branch", "to": "mech_laws", "length": 150 }, 
+            { "from": "mech_branch", "to": "mech_fluids_waves", "length": 150 }, 
+
+            { "from": "thermal_branch", "to": "th_mkt", "length": 150 }, 
+            { "from": "thermal_branch", "to": "th_processes", "length": 150 }, 
+
+            { "from": "em_branch", "to": "em_electrostatics", "length": 150 }, 
+            { "from": "em_branch", "to": "em_dc", "length": 150 }, 
+            { "from": "em_branch", "to": "em_magnetism", "length": 150 }, 
+            { "from": "em_branch", "to": "em_optics", "length": 150 }, 
+
+            { "from": "quantum_branch", "to": "quantum_atoms", "length": 150 },
+            { "from": "nuclear_branch", "to": "nuclear_physics", "length": 150 }
+        ]
+    };
+
+    let db;
+    let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
+    let edgesData = new vis.DataSet(SYLLABUS_DATA.edges);
+    let network;
+    let selectedNodeId = null;
+
+    const normalizedSearch = window.location.search.replace(/\?/g, '&').replace('&', '?');
+    const urlParams = new URLSearchParams(normalizedSearch);
+    let studentId = urlParams.get('student');
+    let isAdmin = urlParams.get('admin') === 'true';
+
+    if (!studentId) {
+        studentId = 'demo_student_oge';
+        isAdmin = true;
+    }
+
+    const overlay = document.getElementById('system-overlay');
+
+    if (isAdmin) {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-student-name').innerText = `Редактирование профиля: ${studentId}`;
+    }
+
+    async function initFirebase() {
+        const fallbackInit = () => {
+            if (!network) {
+                initGraph();
+            }
+            overlay.style.display = 'none';
+        };
+
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+            fallbackInit();
+            return;
+        }
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            db = getFirestore(app);
+
+            await signInAnonymously(auth);
+            
+            const docRef = doc(db, "students", studentId);
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data().progress;
+                    applyProgress(data);
+                }
+                fallbackInit();
+            }, (error) => {
+                console.error("Ошибка чтения Firebase:", error);
+                fallbackInit(); 
+            });
+            
+        } catch (error) {
+            console.error("Ошибка инициализации Firebase:", error);
+            fallbackInit(); 
+        }
+    }
+
+    function applyProgress(data) {
+        if (!data) return;
+
+        if (nodesData) {
+            nodesData.get().forEach(node => {
+                if (node.tasks && data[node.id]) {
+                    const updatedTasks = node.tasks.map((task, index) => {
+                        const savedVal = data[node.id][index];
+                        let newStatus = 'none';
+                        
+                        if (typeof savedVal === 'boolean') {
+                            newStatus = savedVal ? 'completed' : 'none';
+                        } else if (typeof savedVal === 'string') {
+                            newStatus = savedVal;
+                        }
+
+                        return {
+                            ...task,
+                            status: newStatus,
+                            completed: newStatus === 'completed'
+                        };
+                    });
+                    nodesData.update({ id: node.id, tasks: updatedTasks });
+                }
+            });
+            calculateTreeStatus();
+            if (selectedNodeId) updateSidePanel(nodesData.get(selectedNodeId));
+        }
+    }
+
+    async function saveToFirebase() {
+        if (!db) return;
+        const progress = {};
+        nodesData.get().forEach(node => {
+            if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
+        });
+        try {
+            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
+        } catch (error) {
+            console.error("Ошибка записи:", error);
+        }
+    }
+
+    function initGraph() {
+        const container = document.getElementById('network-container');
+        const data = { nodes: nodesData, edges: edgesData };
+
+        const options = {
+            nodes: {
+                shape: 'box', margin: { top: 12, bottom: 12, left: 16, right: 16 }, 
+                shapeProperties: { borderRadius: 6 }, borderWidth: 2, font: { face: 'Segoe UI', size: 14, color: '#4a3538' }
+            },
+            edges: { width: 2, color: { color: '#ffccd5', highlight: '#ff85a2' }, smooth: false },
+            groups: {
+                completed: { color: { background: '#d4edda', border: '#28a745', highlight: { background: '#c3e6cb', border: '#218838' } }, font: { color: '#155724' }, shadow: { enabled: true, color: 'rgba(40, 167, 69, 0.2)', size: 10, x: 0, y: 0 } },
+                in_progress: { color: { background: '#fff3cd', border: '#ffc107', highlight: { background: '#ffeeba', border: '#e0a800' } }, font: { color: '#856404' }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.2)', size: 10, x: 0, y: 0 } },
+                lost: { color: { background: '#f8d7da', border: '#dc3545', highlight: { background: '#f5c6cb', border: '#c82333' } }, font: { color: '#721c24' }, shadow: { enabled: true, color: 'rgba(220, 53, 69, 0.2)', size: 10, x: 0, y: 0 } },
+                locked: { color: { background: '#ffffff', border: '#ffb6c1', highlight: { background: '#ffe5ec', border: '#ff85a2' } }, font: { color: '#4a3538' }, shadow: false }
+            },
+            physics: { forceAtlas2Based: { gravitationalConstant: -220, centralGravity: 0.005, springLength: 150, springConstant: 0.12 }, maxVelocity: 50, solver: 'forceAtlas2Based', timestep
