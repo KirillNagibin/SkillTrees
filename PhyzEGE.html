@@ -8,7 +8,6 @@
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     
     <script>
-        // Настройка MathJax для рендеринга формул
         MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -157,10 +156,8 @@
         .text-pending { color: #888888; }
         .text-lost { color: #EF4444; font-weight: 500; }
         
-        /* Убираем принудительный белый цвет MathJax в пользу наследования */
         mjx-container[jax="SVG"] { color: inherit !important; }
 
-        /* Админ панель */
         #admin-panel {
             display: none;
             position: fixed;
@@ -211,7 +208,6 @@
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Конфигурация Firebase для синхронизации прогресса
     const firebaseConfig = {
         apiKey: "AIzaSyAzMNW7xdVazEUnJiKoYPN8laMWD1BZqCw",
         authDomain: "physicsskilltree.firebaseapp.com",
@@ -225,7 +221,6 @@
         "nodes": [
             { "id": "ege_physics", "label": "Физика ЕГЭ", "group": "locked", "font": { "size": 20 } },
             
-            // Основные разделы (Ветви)
             { "id": "mech_branch", "label": "Механика", "group": "locked" },
             { "id": "mkt_branch", "label": "МКТ и Термодинамика", "group": "locked" },
             { "id": "ed_branch", "label": "Электродинамика", "group": "locked" },
@@ -233,7 +228,6 @@
             { "id": "quantum_branch", "label": "Квантовая физика", "group": "locked" },
             
             // --- МЕХАНИКА ---
-            // Кинематика
             {
                 "id": "mech_kin", "label": "Кинематика", "group": "locked",
                 "tasks": [
@@ -244,7 +238,6 @@
                     { "text": "Сложение скоростей и перемещений", "completed": false }
                 ]
             },
-            // Динамика
             {
                 "id": "mech_dyn", "label": "Динамика", "group": "locked",
                 "tasks": [
@@ -255,7 +248,6 @@
                     { "text": "Принцип суперпозиции сил", "completed": false }
                 ]
             },
-            // Статика
             {
                 "id": "mech_stat", "label": "Статика и Гидростатика", "group": "locked",
                 "tasks": [
@@ -264,7 +256,6 @@
                     { "text": "Закон Архимеда ($F=\\rho g V$)", "completed": false }
                 ]
             },
-            // Законы сохранения
             {
                 "id": "mech_cons", "label": "Законы сохранения", "group": "locked",
                 "tasks": [
@@ -274,7 +265,6 @@
                     { "text": "Закон сохранения механической энергии", "completed": false }
                 ]
             },
-            // Механические колебания
             {
                 "id": "mech_osc", "label": "Колебания и Волны", "group": "locked",
                 "tasks": [
@@ -285,7 +275,6 @@
             },
 
             // --- МКТ и ТЕРМОДИНАМИКА ---
-            // МКТ
             {
                 "id": "th_mkt", "label": "Молекулярно-кинетическая теория", "group": "locked",
                 "tasks": [
@@ -297,7 +286,6 @@
                     { "text": "Влажность воздуха. Насыщенные пары", "completed": false }
                 ]
             },
-            // Агрегатные состояния
             {
                 "id": "th_phase", "label": "Агрегатные состояния", "group": "locked",
                 "tasks": [
@@ -306,7 +294,6 @@
                     { "text": "Уравнение теплового баланса", "completed": false }
                 ]
             },
-            // Термодинамика
             {
                 "id": "th_thermo", "label": "Термодинамика", "group": "locked",
                 "tasks": [
@@ -320,7 +307,6 @@
             },
 
             // --- ЭЛЕКТРОДИНАМИКА ---
-            // Электростатика
             {
                 "id": "ed_es", "label": "Электростатика", "group": "locked",
                 "tasks": [
@@ -331,7 +317,6 @@
                     { "text": "Конденсаторы ($C=q/U$). Энергия ($W=\\frac{CU^2}{2}$)", "completed": false }
                 ]
             },
-            // Постоянный ток
             {
                 "id": "ed_dc", "label": "Законы постоянного тока", "group": "locked",
                 "tasks": [
@@ -340,7 +325,6 @@
                     { "text": "Работа и мощность тока ($P=UI$). Закон Джоуля-Ленца ($Q=I^2Rt$)", "completed": false }
                 ]
             },
-            // Магнитное поле
             {
                 "id": "ed_mag", "label": "Магнитное поле", "group": "locked",
                 "tasks": [
@@ -349,16 +333,14 @@
                     { "text": "Вектор магнитной индукции. Принцип суперпозиции", "completed": false }
                 ]
             },
-            // ЭМ Индукция
             {
                 "id": "ed_emi", "label": "Электромагнитная индукция", "group": "locked",
                 "tasks": [
                     { "text": "Магнитный поток ($\\Phi=B S \\cos\\alpha$)", "completed": false },
-                    { "text": "Закон ЭМ индукции ($\mathcal{E}=-\\frac{\\Delta\\Phi}{\\Delta t}$). Правило Ленца", "completed": false },
+                    { "text": "Закон ЭМ индукции ($\\mathcal{E}=-\\frac{\\Delta\\Phi}{\\Delta t}$). Правило Ленца", "completed": false },
                     { "text": "Явление самоиндукции. Индуктивность. Энергия магнитного поля", "completed": false }
                 ]
             },
-            // ЭМ Колебания
             {
                 "id": "ed_osc", "label": "ЭМ Колебания и Волны", "group": "locked",
                 "tasks": [
@@ -367,7 +349,6 @@
                     { "text": "Электромагнитные волны, их свойства", "completed": false }
                 ]
             },
-            // Оптика
             {
                 "id": "ed_optics", "label": "Оптика", "group": "locked",
                 "tasks": [
@@ -381,7 +362,7 @@
 
             // --- ОСНОВЫ СТО ---
             {
-                "id": "sto_branch", "label": "СТО (зад. 12)", "group": "locked",
+                "id": "sto_tasks", "label": "СТО (зад. 12)", "group": "locked",
                 "tasks": [
                     { "text": "Инвариантность скорости света ($c=3\\times 10^8$ м/с)", "completed": false },
                     { "text": "Постулаты Эйнштейна. Импульс релятивистской частицы", "completed": false },
@@ -390,7 +371,6 @@
             },
 
             // --- КВАНТОВАЯ ФИЗИКА ---
-            // Корпускулярно-волновой дуализм
             {
                 "id": "q_cwd", "label": "Дуализм", "group": "locked",
                 "tasks": [
@@ -400,7 +380,6 @@
                     { "text": "Давление света", "completed": false }
                 ]
             },
-            // Физика атома
             {
                 "id": "q_atom", "label": "Физика атома", "group": "locked",
                 "tasks": [
@@ -409,12 +388,11 @@
                     { "text": "Спектры. Спектр атома водорода", "completed": false }
                 ]
             },
-            // Физика атомного ядра
             {
                 "id": "q_nucleus", "label": "Физика атомного ядра", "group": "locked",
                 "tasks": [
                     { "text": "Модель ядра (протоны, нейтроны). Изотопы", "completed": false },
-                    { "text": "Энергия связи ядер. Дефект массы ($\Delta m=Zm_p+(A-Z)m_n-m_{ядра}$)", "completed": false },
+                    { "text": "Энергия связи ядер. Дефект массы ($\\Delta m=Zm_p+(A-Z)m_n-m_{ядра}$)", "completed": false },
                     { "text": "Радиоактивность. Закон рад. распада ($N=N_0e^{-\\lambda t}$)", "completed": false },
                     { "text": "Период полураспада ($T=\\frac{\\ln 2}{\\lambda}$)", "completed": false },
                     { "text": "Ядерные реакции. Деление и синтез", "completed": false }
@@ -428,19 +406,19 @@
             { "from": "ege_physics", "to": "sto_branch", "length": 250 }, 
             { "from": "ege_physics", "to": "quantum_branch", "length": 250 },
 
-            // Механика связи
+            // Механика hrana
             { "from": "mech_branch", "to": "mech_kin", "length": 150 }, 
             { "from": "mech_branch", "to": "mech_dyn", "length": 150 }, 
             { "from": "mech_branch", "to": "mech_stat", "length": 150 }, 
             { "from": "mech_branch", "to": "mech_cons", "length": 150 }, 
             { "from": "mech_branch", "to": "mech_osc", "length": 150 }, 
 
-            // МКТ связи
+            // МКТ hrana
             { "from": "mkt_branch", "to": "th_mkt", "length": 150 }, 
             { "from": "mkt_branch", "to": "th_phase", "length": 150 }, 
             { "from": "mkt_branch", "to": "th_thermo", "length": 150 }, 
 
-            // Электродинамика связи
+            // Электродинамика hrana
             { "from": "ed_branch", "to": "ed_es", "length": 150 }, 
             { "from": "ed_branch", "to": "ed_dc", "length": 150 }, 
             { "from": "ed_branch", "to": "ed_mag", "length": 150 }, 
@@ -448,7 +426,10 @@
             { "from": "ed_branch", "to": "ed_osc", "length": 150 }, 
             { "from": "ed_branch", "to": "ed_optics", "length": 150 }, 
 
-            // Квантовая связи
+            // СТО hrana
+            { "from": "sto_branch", "to": "sto_tasks", "length": 150 },
+
+            // Квантовая hrana
             { "from": "quantum_branch", "to": "q_cwd", "length": 150 }, 
             { "from": "quantum_branch", "to": "q_atom", "length": 150 }, 
             { "from": "quantum_branch", "to": "q_nucleus", "length": 150 }
@@ -461,18 +442,15 @@
     let network;
     let selectedNodeId = null;
 
-    // Извлекаем параметры из URL
     const urlParams = new URLSearchParams(window.location.search);
     let studentId = urlParams.get('student');
     let isAdmin = urlParams.get('admin') === 'true';
 
-    // Для демонстрации, если ID не указан
     if (!studentId) {
         studentId = 'demo_student_ege';
         isAdmin = true;
     }
 
-    // Обработка оверлея
     const overlay = document.getElementById('system-overlay');
 
     if (isAdmin) {
@@ -492,18 +470,15 @@
             const auth = getAuth(app);
             db = getFirestore(app);
 
-            // Анонимная авторизация для чтения Security Rules
             await signInAnonymously(auth);
             
             const docRef = doc(db, "students", studentId);
             
-            // Подписываемся на обновления прогресса
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data().progress;
                     applyProgress(data);
                 } else {
-                    // Создаем пустой профиль при отсутствии
                     saveToFirebase();
                 }
                 
@@ -522,7 +497,6 @@
         }
     }
 
-    // Применение прогресса из БД
     function applyProgress(data) {
         if (!data) return;
 
@@ -553,7 +527,6 @@
         }
     }
 
-    // Сохранение прогресса в БД
     async function saveToFirebase() {
         if (!db) return;
         const progress = {};
@@ -593,7 +566,6 @@
             if (params.nodes.length > 0) {
                 selectedNodeId = params.nodes[0];
                 const nodeData = nodesData.get(selectedNodeId);
-                // Проверяем наличие задач, не открываем панель для ветвей
                 if (nodeData.tasks || nodeData.group === 'lost' || nodeData.group === 'completed') {
                     updateSidePanel(nodeData);
                     document.getElementById('side-panel').classList.add('open');
@@ -606,7 +578,6 @@
         });
     }
 
-    // Расчет статуса родительских узлов на основе задач
     function calculateTreeStatus() {
         const allEdges = edgesData.get();
         const parentMap = {};
@@ -615,12 +586,10 @@
             parentMap[e.from].push(e.to);
         });
 
-        // Рекурсивный обход
         function evalNode(nodeId) {
             const children = parentMap[nodeId];
             const node = nodesData.get(nodeId);
             
-            // Листовой узел (тема)
             if (!children || children.length === 0) {
                 if (node.tasks) {
                     const total = node.tasks.length;
@@ -637,7 +606,6 @@
                 return;
             }
 
-            // Узел ветви
             children.forEach(childId => evalNode(childId)); 
 
             let allCompleted = true; 
@@ -662,7 +630,6 @@
         evalNode('ege_physics'); 
     }
 
-    // Переключение статуса задачи (Админ)
     window.handleTaskToggle = function(nodeId, taskIndex) {
         if (!isAdmin) return;
         const node = nodesData.get(nodeId);
@@ -687,7 +654,6 @@
         saveToFirebase();
     };
 
-    // Обновление боковой панели
     function updateSidePanel(nodeData) {
         const spTitle = document.getElementById('sp-title');
         const spStatus = document.getElementById('sp-status');
@@ -732,7 +698,6 @@
         }
         
         spDesc.innerHTML = descHtml;
-        // Рендер MathJax после обновления HTML
         MathJax.typesetPromise([spDesc]).catch(err => console.error("MathJax Error:", err));
     }
 
