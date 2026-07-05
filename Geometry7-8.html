@@ -208,9 +208,6 @@
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // ============================================================================
-    // 1. FIREBASE CONFIG
-    // ============================================================================
     const firebaseConfig = {
         apiKey: "AIzaSyAzMNW7xdVazEUnJiKoYPN8laMWD1BZqCw",
         authDomain: "physicsskilltree.firebaseapp.com",
@@ -220,9 +217,6 @@
         appId: "1:414823459706:web:80e86f596c6e9f2c4704c3"
     };
 
-    // ============================================================================
-    // 2. ДАННЫЕ СИЛЛАБУСА (ГЕОМЕТРИЯ)
-    // ============================================================================
     const SYLLABUS_DATA = {
         "nodes": [
             { "id": "geometry", "label": "Геометрия", "group": "locked", "font": { "size": 20 } },
@@ -326,32 +320,34 @@
             }
         ],
         "edges": [
-            // Root connections
             { "from": "geometry", "to": "grade_7", "length": 250 },
             { "from": "geometry", "to": "grade_8", "length": 250 },
 
-            // 7th Grade path
             { "from": "grade_7", "to": "geo_basics", "length": 150 },
             { "from": "geo_basics", "to": "geo_triangles_7", "length": 150 },
             { "from": "geo_triangles_7", "to": "geo_parallel", "length": 150 },
             { "from": "geo_parallel", "to": "geo_circle_7", "length": 150 },
 
-            // 8th Grade path (Branching out)
             { "from": "grade_8", "to": "geo_quads", "length": 150 },
             { "from": "geo_quads", "to": "geo_pythagoras", "length": 150 },
             { "from": "geo_pythagoras", "to": "geo_areas", "length": 150 },
             { "from": "geo_areas", "to": "geo_similarity", "length": 150 },
             { "from": "geo_similarity", "to": "geo_circle_8", "length": 150 },
             
-            // Side branch in 8th grade
             { "from": "grade_8", "to": "geo_vectors", "length": 200 },
             { "from": "geo_vectors", "to": "geo_transformations", "length": 150 }
         ]
     };
 
-    // ============================================================================
-    // 3. ИНИЦИАЛИЗАЦИЯ И ЛОГИКА
-    // ============================================================================
+    SYLLABUS_DATA.nodes.forEach(node => {
+        if (node.tasks) {
+            node.tasks.forEach(task => {
+                if (!task.status) {
+                    task.status = task.completed ? 'completed' : 'none';
+                }
+            });
+        }
+    });
     
     const normalizedSearch = window.location.search.replace(/\?/g, '&').replace('&', '?');
     const urlParams = new URLSearchParams(normalizedSearch);
@@ -377,9 +373,15 @@
     let selectedNodeId = null;
 
     async function initFirebase() {
-        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+        const fallbackInit = () => {
+            if (!network) {
+                initGraph();
+            }
             overlay.style.display = 'none';
-            initGraph();
+        };
+
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+            fallbackInit();
             return;
         }
 
@@ -390,25 +392,21 @@
 
             await signInAnonymously(auth);
             
-            const docRef = doc(db, "students_geo", studentId);
+            const docRef = doc(db, "students", studentId);
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data().progress;
                     applyProgress(data);
                 }
-                
-                if (!network) {
-                    initGraph();
-                }
-                overlay.style.display = 'none';
+                fallbackInit();
             }, (error) => {
-                console.error("Ошибка чтения:", error);
-                overlay.innerHTML = "Ошибка доступа к Firebase. Проверьте Security Rules.";
+                console.error("Ошибка чтения Firebase:", error);
+                fallbackInit(); 
             });
             
         } catch (error) {
-            console.error(error);
-            overlay.innerHTML = "Ошибка инициализации Firebase.";
+            console.error("Ошибка инициализации Firebase:", error);
+            fallbackInit(); 
         }
     }
 
@@ -449,7 +447,7 @@
             if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
         });
         try {
-            await setDoc(doc(db, "students_geo", studentId), { progress }, { merge: true });
+            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
         } catch (error) {
             console.error("Ошибка записи:", error);
         }
