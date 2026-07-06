@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дерево навыков: Геометрия 7-8 класс</title>
+    <title>Дерево навыков: Геометрия 7 класс</title>
     
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     
@@ -219,123 +219,107 @@
 
     const SYLLABUS_DATA = {
         "nodes": [
-            { "id": "geometry", "label": "Геометрия", "group": "locked", "font": { "size": 20 } },
+            { "id": "geo7", "label": "Геометрия 7 класс", "group": "locked", "font": { "size": 20 } },
             
-            { "id": "grade_7", "label": "7 КЛАСС", "group": "locked", "font": { "size": 16, "color": "#81c784" } },
-            { "id": "grade_8", "label": "8 КЛАСС", "group": "locked", "font": { "size": 16, "color": "#7fcfff" } },
+            { "id": "branch_basics", "label": "Начальные сведения", "group": "locked" },
+            { "id": "branch_triangles", "label": "Треугольники", "group": "locked" },
+            { "id": "branch_parallel", "label": "Параллельность и углы", "group": "locked" },
+            { "id": "branch_circles", "label": "Окружность и построения", "group": "locked" },
+            
+            // НАЧАЛЬНЫЕ СВЕДЕНИЯ
+            {
+                "id": "node_lines_angles", "label": "Базовые объекты", "group": "locked",
+                "tasks": [
+                    { "text": "Распознавание, сравнение и измерение отрезков и углов", "completed": false },
+                    { "text": "Применение свойств смежных и вертикальных углов", "completed": false },
+                    { "text": "Построение перпендикулярных прямых", "completed": false },
+                    { "text": "Понимание структуры доказательства: различие аксиом и теорем", "completed": false }
+                ]
+            },
 
-            // --- 7 КЛАСС ---
+            // ТРЕУГОЛЬНИКИ
             {
-                "id": "geo_basics", "label": "Базовые понятия", "group": "locked",
+                "id": "node_triangles_intro", "label": "Свойства треугольника", "group": "locked",
                 "tasks": [
-                    { "text": "Работа с точками, прямыми, отрезками и лучами", "completed": false },
-                    { "text": "Измерение углов. Свойства смежных и вертикальных углов", "completed": false },
-                    { "text": "Определение перпендикулярных прямых", "completed": false },
-                    { "text": "Базовые геометрические построения циркулем и линейкой", "completed": false }
+                    { "text": "Идентификация элементов треугольника и вычисление периметра", "completed": false },
+                    { "text": "Построение и свойства медианы, биссектрисы и высоты", "completed": false },
+                    { "text": "Применение свойств равнобедренного и равностороннего треугольников", "completed": false }
                 ]
             },
             {
-                "id": "geo_triangles_7", "label": "Треугольники (База)", "group": "locked",
+                "id": "node_triangles_eq", "label": "Равенство треугольников", "group": "locked",
                 "tasks": [
-                    { "text": "Применение трех признаков равенства треугольников", "completed": false },
-                    { "text": "Построение медианы, биссектрисы и высоты", "completed": false },
-                    { "text": "Использование свойств равнобедренного и равностороннего треугольников", "completed": false },
-                    { "text": "Применение свойств прямоугольных треугольников и их признаков равенства", "completed": false }
+                    { "text": "Применение I признака равенства (по двум сторонам и углу между ними)", "completed": false },
+                    { "text": "Применение II признака равенства (по стороне и двум прилежащим углам)", "completed": false },
+                    { "text": "Применение III признака равенства (по трем сторонам)", "completed": false }
+                ]
+            },
+
+            // ПАРАЛЛЕЛЬНОСТЬ И УГЛЫ
+            {
+                "id": "node_parallel_rules", "label": "Параллельные прямые", "group": "locked",
+                "tasks": [
+                    { "text": "Распознавание накрест лежащих, соответственных и односторонних углов", "completed": false },
+                    { "text": "Доказательство и применение признаков параллельности прямых", "completed": false },
+                    { "text": "Использование аксиомы параллельных прямых в доказательствах", "completed": false }
                 ]
             },
             {
-                "id": "geo_parallel", "label": "Параллельные прямые", "group": "locked",
+                "id": "node_triangle_sum", "label": "Углы треугольника", "group": "locked",
                 "tasks": [
-                    { "text": "Доказательство параллельности (накрест лежащие, соответственные, односторонние углы)", "completed": false },
                     { "text": "Применение теоремы о сумме углов треугольника ($180^\\circ$)", "completed": false },
-                    { "text": "Вычисление внешнего угла треугольника", "completed": false }
+                    { "text": "Вычисление и использование свойств внешнего угла треугольника", "completed": false }
                 ]
             },
             {
-                "id": "geo_circle_7", "label": "Введение в окружность", "group": "locked",
+                "id": "node_right_triangles", "label": "Прямоугольные треугольники", "group": "locked",
                 "tasks": [
-                    { "text": "Распознавание радиуса, диаметра, хорды и дуги", "completed": false },
-                    { "text": "Применение свойств касательной к окружности", "completed": false },
-                    { "text": "Определение центрального угла", "completed": false }
+                    { "text": "Применение свойств прямоугольного треугольника (катеты, гипотенуза)", "completed": false },
+                    { "text": "Использование специфических признаков равенства прямоугольных треугольников", "completed": false },
+                    { "text": "Анализ свойств перпендикуляра, наклонной и её проекции", "completed": false }
                 ]
             },
 
-            // --- 8 КЛАСС ---
+            // ОКРУЖНОСТЬ И ПОСТРОЕНИЯ
             {
-                "id": "geo_quads", "label": "Четырехугольники", "group": "locked",
+                "id": "node_circle_elements", "label": "Окружность", "group": "locked",
                 "tasks": [
-                    { "text": "Распознавание параллелограмма, прямоугольника, ромба, квадрата", "completed": false },
-                    { "text": "Применение свойств диагоналей и углов параллелограмма и ромба", "completed": false },
-                    { "text": "Работа с трапецией (виды, свойства равнобокой трапеции)", "completed": false },
-                    { "text": "Вычисление средней линии трапеции", "completed": false }
+                    { "text": "Идентификация центра, радиуса, диаметра и хорды", "completed": false },
+                    { "text": "Применение свойств касательной и секущей к окружности", "completed": false },
+                    { "text": "Вычисление градусной меры центрального угла и дуги", "completed": false }
                 ]
             },
             {
-                "id": "geo_pythagoras", "label": "Теорема Пифагора и Тригонометрия", "group": "locked",
+                "id": "node_constructions", "label": "Геометрические построения", "group": "locked",
                 "tasks": [
-                    { "text": "Нахождение неизвестной стороны через $c^2 = a^2 + b^2$", "completed": false },
-                    { "text": "Определение $\\sin\\alpha$, $\\cos\\alpha$, $\\tan\\alpha$ в прямоугольном треугольнике", "completed": false },
-                    { "text": "Применение основного тригонометрического тождества ($\\sin^2\\alpha + \\cos^2\\alpha = 1$)", "completed": false }
-                ]
-            },
-            {
-                "id": "geo_areas", "label": "Площади фигур", "group": "locked",
-                "tasks": [
-                    { "text": "Вычисление площади треугольника (в т.ч. через синус и формулу Герона)", "completed": false },
-                    { "text": "Вычисление площади параллелограмма ($S=ah$) и прямоугольника", "completed": false },
-                    { "text": "Вычисление площади трапеции и ромба (через диагонали)", "completed": false },
-                    { "text": "Расчет площади круга ($S=\\pi R^2$) и сектора", "completed": false }
-                ]
-            },
-            {
-                "id": "geo_similarity", "label": "Подобие треугольников", "group": "locked",
-                "tasks": [
-                    { "text": "Применение трех признаков подобия треугольников", "completed": false },
-                    { "text": "Использование теоремы о пропорциональных отрезках", "completed": false },
-                    { "text": "Работа со средней линией треугольника", "completed": false }
-                ]
-            },
-            {
-                "id": "geo_circle_8", "label": "Окружность (Продвинутая)", "group": "locked",
-                "tasks": [
-                    { "text": "Вычисление вписанного угла (равен половине дуги)", "completed": false },
-                    { "text": "Анализ свойств вписанных и описанных четырехугольников", "completed": false }
-                ]
-            },
-            {
-                "id": "geo_vectors", "label": "Координаты и Векторы", "group": "locked",
-                "tasks": [
-                    { "text": "Расчет расстояния между точками и координат середины отрезка", "completed": false },
-                    { "text": "Работа с уравнением окружности $(x - a)^2 + (y - b)^2 = R^2$", "completed": false },
-                    { "text": "Сложение, вычитание векторов и умножение вектора на число", "completed": false },
-                    { "text": "Анализ коллинеарности векторов", "completed": false }
-                ]
-            },
-            {
-                "id": "geo_transformations", "label": "Движения плоскости", "group": "locked",
-                "tasks": [
-                    { "text": "Построение фигур при осевой и центральной симметрии", "completed": false },
-                    { "text": "Применение параллельного переноса и поворота", "completed": false }
+                    { "text": "Построение отрезка и угла, равного данному (циркулем и линейкой)", "completed": false },
+                    { "text": "Построение биссектрисы угла и серединного перпендикуляра к отрезку", "completed": false },
+                    { "text": "Построение прямой, параллельной данной", "completed": false },
+                    { "text": "Построение треугольника по трем заданным элементам", "completed": false }
                 ]
             }
         ],
         "edges": [
-            { "from": "geometry", "to": "grade_7", "length": 250 },
-            { "from": "geometry", "to": "grade_8", "length": 250 },
+            { "from": "geo7", "to": "branch_basics", "length": 200 }, 
+            { "from": "geo7", "to": "branch_triangles", "length": 200 }, 
+            { "from": "geo7", "to": "branch_parallel", "length": 200 }, 
+            { "from": "geo7", "to": "branch_circles", "length": 200 },
 
-            { "from": "grade_7", "to": "geo_basics", "length": 150 },
-            { "from": "geo_basics", "to": "geo_triangles_7", "length": 150 },
-            { "from": "geo_triangles_7", "to": "geo_parallel", "length": 150 },
-            { "from": "geo_parallel", "to": "geo_circle_7", "length": 150 },
+            // Начальные сведения
+            { "from": "branch_basics", "to": "node_lines_angles", "length": 150 }, 
 
-            { "from": "grade_8", "to": "geo_quads", "length": 150 },
-            { "from": "geo_quads", "to": "geo_pythagoras", "length": 150 },
-            { "from": "geo_pythagoras", "to": "geo_areas", "length": 150 },
-            { "from": "geo_areas", "to": "geo_similarity", "length": 150 },
-            { "from": "geo_similarity", "to": "geo_circle_8", "length": 150 },
-            
-            { "from": "grade_8", "to": "geo_vectors", "length": 200 },
-            { "from": "geo_vectors", "to": "geo_transformations", "length": 150 }
+            // Треугольники
+            { "from": "branch_triangles", "to": "node_triangles_intro", "length": 150 }, 
+            { "from": "branch_triangles", "to": "node_triangles_eq", "length": 150 }, 
+
+            // Параллельность
+            { "from": "branch_parallel", "to": "node_parallel_rules", "length": 150 }, 
+            { "from": "branch_parallel", "to": "node_triangle_sum", "length": 150 }, 
+            { "from": "branch_parallel", "to": "node_right_triangles", "length": 150 }, 
+
+            // Окружности и построения
+            { "from": "branch_circles", "to": "node_circle_elements", "length": 150 }, 
+            { "from": "branch_circles", "to": "node_constructions", "length": 150 }
         ]
     };
 
@@ -355,7 +339,7 @@
     let isAdmin = urlParams.get('admin') === 'true';
 
     if (!studentId) {
-        studentId = 'demo_student_geometry';
+        studentId = 'demo_student_geo7';
         isAdmin = true;
     }
 
@@ -392,7 +376,7 @@
 
             await signInAnonymously(auth);
             
-            const docRef = doc(db, "students", studentId);
+            const docRef = doc(db, "students_geo", studentId);
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data().progress;
@@ -447,7 +431,7 @@
             if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
         });
         try {
-            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
+            await setDoc(doc(db, "students_geo", studentId), { progress }, { merge: true });
         } catch (error) {
             console.error("Ошибка записи:", error);
         }
@@ -534,7 +518,7 @@
             if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
         }
         
-        evalNode('geometry'); 
+        evalNode('geo7'); 
     }
 
     window.handleTaskToggle = function(nodeId, taskIndex) {
