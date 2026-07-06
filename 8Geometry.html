@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дерево навыков: Геометрия 8 класс</title>
+    
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+        #network-container {
+            width: 100%;
+            height: 100%;
+        }
+        #side-panel {
+            position: absolute;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+            transition: right 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #333;
+        }
+        #side-panel.open {
+            right: 0;
+        }
+        .panel-title {
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .panel-status {
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .panel-desc {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #b0b0b0;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .panel-desc::-webkit-scrollbar { width: 4px; }
+        .panel-desc::-webkit-scrollbar-thumb { background-color: #555; border-radius: 2px; }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.2em;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            transition: color 0.2s;
+        }
+        .close-btn:hover { color: #fff; }
+        .status-completed { color: #81c784; }
+        .status-in_progress { color: #ffd54f; }
+        .status-locked { color: #888888; }
+        .status-lost { color: #EF4444; }
+        
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .task-item { margin-bottom: 16px; }
+        
+        .task-label {
+            display: flex;
+            align-items: flex-start;
+            font-size: 0.95em;
+            position: relative;
+            cursor: default;
+        }
+        .task-label.interactive { cursor: pointer; }
+        
+        .task-status-btn {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #444;
+            border-radius: 4px;
+            margin-right: 12px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            background-color: #2a2a2a;
+            user-select: none;
+        }
+        .task-label.interactive:hover .task-status-btn.state-none { border-color: #888; }
+        
+        .task-status-btn.state-completed {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+        .task-status-btn.state-lost {
+            background-color: #EF4444;
+            border-color: #EF4444;
+            color: white;
+        }
+        
+        .task-text {
+            line-height: 1.5;
+            display: inline;
+            word-break: break-word;
+            transition: color 0.2s;
+        }
+        .text-completed { color: #81c784; font-weight: 500; }
+        .text-pending { color: #888888; }
+        .text-lost { color: #EF4444; font-weight: 500; }
+        
+        mjx-container[jax="SVG"] { color: inherit !important; }
+
+        #admin-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #1e1e1e;
+            border: 1px solid #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #system-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+<div id="system-overlay">Инициализация...</div>
+
+<div id="network-container"></div>
+
+<div id="side-panel">
+    <button class="close-btn" onclick="closePanel()">✕</button>
+    <h2 id="sp-title" class="panel-title">Название</h2>
+    <div id="sp-status" class="panel-status">Статус: ...</div>
+    <div id="sp-desc" class="panel-desc">Описание.</div>
+</div>
+
+<div id="admin-panel">
+    <h3 style="margin-top:0; font-size: 1em; color: #4CAF50;">Режим преподавателя</h3>
+    <p id="admin-student-name" style="font-size: 0.8em; color: #bbb; margin: 5px 0 0 0;"></p>
+    <p style="font-size: 0.8em; color: #888; margin: 5px 0 0 0;">Изменения сохраняются автоматически.</p>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAzMNW7xdVazEUnJiKoYPN8laMWD1BZqCw",
+        authDomain: "physicsskilltree.firebaseapp.com",
+        projectId: "physicsskilltree",
+        storageBucket: "physicsskilltree.firebasestorage.app",
+        messagingSenderId: "414823459706",
+        appId: "1:414823459706:web:80e86f596c6e9f2c4704c3"
+    };
+
+    const SYLLABUS_DATA = {
+        "nodes": [
+            { "id": "geo8", "label": "Геометрия 8 класс", "group": "locked", "font": { "size": 20 } },
+            
+            { "id": "branch_quads_areas", "label": "Четырехугольники и Площади", "group": "locked" },
+            { "id": "branch_pyth_sim", "label": "Подобие и Теорема Пифагора", "group": "locked" },
+            { "id": "branch_circles", "label": "Окружность", "group": "locked" },
+            { "id": "branch_analytical", "label": "Векторы и Координаты", "group": "locked" },
+            
+            // --- Четырехугольники и Площади ---
+            {
+                "id": "node_quads", "label": "Многоугольники", "group": "locked",
+                "tasks": [
+                    { "text": "Вычисление суммы углов выпуклого многоугольника", "completed": false },
+                    { "text": "Применение свойств и признаков параллелограмма, прямоугольника, ромба и квадрата", "completed": false },
+                    { "text": "Использование свойств трапеции и вычисление её средней линии", "completed": false }
+                ]
+            },
+            {
+                "id": "node_areas", "label": "Площади фигур", "group": "locked",
+                "tasks": [
+                    { "text": "Вычисление площади треугольника (основная формула, Герон, через синус)", "completed": false },
+                    { "text": "Вычисление площади параллелограмма ($S=ah$) и прямоугольника", "completed": false },
+                    { "text": "Вычисление площади трапеции и ромба (в т.ч. через диагонали)", "completed": false },
+                    { "text": "Расчет площади круга ($S=\\pi R^2$) и площади кругового сектора", "completed": false }
+                ]
+            },
+
+            // --- Подобие и Теорема Пифагора ---
+            {
+                "id": "node_pythagoras", "label": "Теорема Пифагора", "group": "locked",
+                "tasks": [
+                    { "text": "Вычисление неизвестной стороны в прямоугольном треугольнике ($c^2=a^2+b^2$)", "completed": false },
+                    { "text": "Определение $\\sin\\alpha$, $\\cos\\alpha$, $\\tan\\alpha$ острого угла", "completed": false },
+                    { "text": "Применение основного тригонометрического тождества ($\\sin^2\\alpha + \\cos^2\\alpha = 1$)", "completed": false }
+                ]
+            },
+            {
+                "id": "node_similarity", "label": "Подобие треугольников", "group": "locked",
+                "tasks": [
+                    { "text": "Применение трех признаков подобия треугольников", "completed": false },
+                    { "text": "Использование средней линии треугольника и теоремы о пропорциональных отрезках", "completed": false },
+                    { "text": "Анализ отношения площадей и периметров подобных фигур", "completed": false }
+                ]
+            },
+
+            // --- Окружность ---
+            {
+                "id": "node_circle_angles", "label": "Углы и фигуры в окружности", "group": "locked",
+                "tasks": [
+                    { "text": "Вычисление вписанного угла (теорема о половине дуги)", "completed": false },
+                    { "text": "Применение свойств вписанного и описанного четырехугольников", "completed": false },
+                    { "text": "Применение теорем о пересекающихся хордах, касательной и секущей", "completed": false }
+                ]
+            },
+
+            // --- Аналитическая геометрия ---
+            {
+                "id": "node_coords", "label": "Метод координат", "group": "locked",
+                "tasks": [
+                    { "text": "Вычисление расстояния между точками и координат середины отрезка", "completed": false },
+                    { "text": "Работа с уравнением окружности $(x-a)^2+(y-b)^2=R^2$", "completed": false },
+                    { "text": "Составление и использование уравнения прямой", "completed": false }
+                ]
+            },
+            {
+                "id": "node_vectors", "label": "Векторы", "group": "locked",
+                "tasks": [
+                    { "text": "Определение координат вектора и расчет его длины", "completed": false },
+                    { "text": "Сложение, вычитание векторов и умножение вектора на число", "completed": false },
+                    { "text": "Анализ коллинеарности векторов", "completed": false }
+                ]
+            },
+            {
+                "id": "node_transformations", "label": "Движения плоскости", "group": "locked",
+                "tasks": [
+                    { "text": "Построение фигур при осевой и центральной симметрии", "completed": false },
+                    { "text": "Применение свойств параллельного переноса и поворота", "completed": false }
+                ]
+            }
+        ],
+        "edges": [
+            { "from": "geo8", "to": "branch_quads_areas", "length": 250 }, 
+            { "from": "geo8", "to": "branch_pyth_sim", "length": 250 }, 
+            { "from": "geo8", "to": "branch_circles", "length": 200 }, 
+            { "from": "geo8", "to": "branch_analytical", "length": 250 },
+
+            { "from": "branch_quads_areas", "to": "node_quads", "length": 150 }, 
+            { "from": "branch_quads_areas", "to": "node_areas", "length": 150 }, 
+
+            { "from": "branch_pyth_sim", "to": "node_pythagoras", "length": 150 }, 
+            { "from": "branch_pyth_sim", "to": "node_similarity", "length": 150 }, 
+
+            { "from": "branch_circles", "to": "node_circle_angles", "length": 150 }, 
+
+            { "from": "branch_analytical", "to": "node_coords", "length": 150 }, 
+            { "from": "branch_analytical", "to": "node_vectors", "length": 150 }, 
+            { "from": "branch_analytical", "to": "node_transformations", "length": 150 }
+        ]
+    };
+
+    SYLLABUS_DATA.nodes.forEach(node => {
+        if (node.tasks) {
+            node.tasks.forEach(task => {
+                if (!task.status) {
+                    task.status = task.completed ? 'completed' : 'none';
+                }
+            });
+        }
+    });
+    
+    const normalizedSearch = window.location.search.replace(/\?/g, '&').replace('&', '?');
+    const urlParams = new URLSearchParams(normalizedSearch);
+    let studentId = urlParams.get('student');
+    let isAdmin = urlParams.get('admin') === 'true';
+
+    if (!studentId) {
+        studentId = 'demo_student_geo8';
+        isAdmin = true;
+    }
+
+    const overlay = document.getElementById('system-overlay');
+
+    if (isAdmin) {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-student-name').innerText = `Редактирование профиля: ${studentId}`;
+    }
+
+    let db;
+    let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
+    let edgesData = new vis.DataSet(SYLLABUS_DATA.edges);
+    let network;
+    let selectedNodeId = null;
+
+    async function initFirebase() {
+        const fallbackInit = () => {
+            if (!network) {
+                initGraph();
+            }
+            overlay.style.display = 'none';
+        };
+
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+            fallbackInit();
+            return;
+        }
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            db = getFirestore(app);
+
+            await signInAnonymously(auth);
+            
+            const docRef = doc(db, "students", studentId);
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data().progress;
+                    applyProgress(data);
+                }
+                fallbackInit();
+            }, (error) => {
+                console.error("Ошибка чтения Firebase:", error);
+                fallbackInit(); 
+            });
+            
+        } catch (error) {
+            console.error("Ошибка инициализации Firebase:", error);
+            fallbackInit(); 
+        }
+    }
+
+    function applyProgress(data) {
+        if (!data) return;
+
+        if (nodesData) {
+            nodesData.get().forEach(node => {
+                if (node.tasks && data[node.id]) {
+                    const updatedTasks = node.tasks.map((task, index) => {
+                        const savedVal = data[node.id][index];
+                        let newStatus = 'none';
+                        
+                        if (typeof savedVal === 'boolean') {
+                            newStatus = savedVal ? 'completed' : 'none';
+                        } else if (typeof savedVal === 'string') {
+                            newStatus = savedVal;
+                        }
+
+                        return {
+                            ...task,
+                            status: newStatus,
+                            completed: newStatus === 'completed'
+                        };
+                    });
+                    nodesData.update({ id: node.id, tasks: updatedTasks });
+                }
+            });
+            calculateTreeStatus();
+            if (selectedNodeId) updateSidePanel(nodesData.get(selectedNodeId));
+        }
+    }
+
+    async function saveToFirebase() {
+        if (!db) return;
+        const progress = {};
+        nodesData.get().forEach(node => {
+            if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
+        });
+        try {
+            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
+        } catch (error) {
+            console.error("Ошибка записи:", error);
+        }
+    }
+
+    function initGraph() {
+        const container = document.getElementById('network-container');
+        const data = { nodes: nodesData, edges: edgesData };
+
+        const options = {
+            nodes: {
+                shape: 'box', margin: { top: 12, bottom: 12, left: 16, right: 16 }, 
+                shapeProperties: { borderRadius: 6 }, borderWidth: 2, font: { face: 'Segoe UI', size: 14 }
+            },
+            edges: { width: 2, color: { color: '#444444', highlight: '#ffffff' }, smooth: false },
+            groups: {
+                completed: { color: { background: '#1a3320', border: '#4CAF50', highlight: { background: '#254a2e', border: '#66bb6a' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(76, 175, 80, 0.4)', size: 15, x: 0, y: 0 } },
+                in_progress: { color: { background: '#332a00', border: '#FFC107', highlight: { background: '#4d4000', border: '#ffca28' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: [5, 5] }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.15)', size: 10, x: 0, y: 0 } },
+                lost: { color: { background: '#3d1616', border: '#EF4444', highlight: { background: '#4d1c1c', border: '#f87171' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(239, 68, 68, 0.4)', size: 15, x: 0, y: 0 } },
+                locked: { color: { background: '#1e1e1e', border: '#333333', highlight: { background: '#2a2a2a', border: '#555555' } }, font: { color: '#777777' }, shapeProperties: { borderDashes: false }, shadow: false }
+            },
+            physics: { forceAtlas2Based: { gravitationalConstant: -220, centralGravity: 0.005, springLength: 150, springConstant: 0.12 }, maxVelocity: 50, solver: 'forceAtlas2Based', timestep: 0.35, stabilization: { iterations: 150 } }
+        };
+
+        network = new vis.Network(container, data, options);
+        calculateTreeStatus();
+
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                selectedNodeId = params.nodes[0];
+                updateSidePanel(nodesData.get(selectedNodeId));
+                document.getElementById('side-panel').classList.add('open');
+            } else {
+                window.closePanel();
+            }
+        });
+    }
+
+    function calculateTreeStatus() {
+        const allEdges = edgesData.get();
+        const parentMap = {};
+        allEdges.forEach(e => {
+            if (!parentMap[e.from]) parentMap[e.from] = [];
+            parentMap[e.from].push(e.to);
+        });
+
+        function evalNode(nodeId) {
+            const children = parentMap[nodeId];
+            const node = nodesData.get(nodeId);
+            
+            if (!children || children.length === 0) {
+                if (node.tasks) {
+                    const total = node.tasks.length;
+                    const lostCount = node.tasks.filter(t => t.status === 'lost').length;
+                    const completedCount = node.tasks.filter(t => t.status === 'completed').length;
+                    
+                    let newGroup = 'locked';
+                    if (lostCount > 0) newGroup = 'lost';
+                    else if (completedCount === total && total > 0) newGroup = 'completed';
+                    else if (completedCount > 0) newGroup = 'in_progress';
+                    
+                    if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
+                }
+                return;
+            }
+
+            let allCompleted = true; 
+            let allLocked = true;
+            let anyLost = false;
+
+            children.forEach(childId => {
+                evalNode(childId); 
+                const childNode = nodesData.get(childId);
+                if (childNode.group === 'lost') anyLost = true;
+                if (childNode.group !== 'completed') allCompleted = false;
+                if (childNode.group !== 'locked') allLocked = false;
+            });
+
+            let newGroup = 'locked';
+            if (anyLost) newGroup = 'lost';
+            else if (allCompleted) newGroup = 'completed';
+            else if (!allLocked) newGroup = 'in_progress';
+
+            if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
+        }
+        
+        evalNode('geo8'); 
+    }
+
+    window.handleTaskToggle = function(nodeId, taskIndex) {
+        if (!isAdmin) return;
+        const node = nodesData.get(nodeId);
+        if (!node || !node.tasks) return;
+
+        const task = node.tasks[taskIndex];
+        const states = ['none', 'completed', 'lost'];
+        const currentIndex = states.indexOf(task.status || 'none');
+        const nextState = states[(currentIndex + 1) % states.length];
+
+        const updatedTasks = node.tasks.map((t, idx) => {
+            if (idx === taskIndex) {
+                return { ...t, status: nextState, completed: nextState === 'completed' };
+            }
+            return t;
+        });
+
+        nodesData.update({ id: nodeId, tasks: updatedTasks });
+        
+        calculateTreeStatus();
+        updateSidePanel(nodesData.get(nodeId));
+        saveToFirebase();
+    };
+
+    function updateSidePanel(nodeData) {
+        const spTitle = document.getElementById('sp-title');
+        const spStatus = document.getElementById('sp-status');
+        const spDesc = document.getElementById('sp-desc');
+
+        spTitle.innerText = nodeData.label;
+        spStatus.className = 'panel-status';
+        
+        if (nodeData.group === 'completed') {
+            spStatus.innerText = 'Статус: Изучено'; spStatus.classList.add('status-completed');
+        } else if (nodeData.group === 'lost') {
+            spStatus.innerText = 'Статус: Требует повторения'; spStatus.classList.add('status-lost');
+        } else if (nodeData.group === 'in_progress') {
+            spStatus.innerText = 'Статус: В процессе'; spStatus.classList.add('status-in_progress');
+        } else {
+            spStatus.innerText = 'Статус: Заблокировано'; spStatus.classList.add('status-locked');
+        }
+        
+        let descHtml = "";
+        if (nodeData.tasks && nodeData.tasks.length > 0) {
+            descHtml += '<ul class="task-list">';
+            nodeData.tasks.forEach((task, index) => {
+                const status = task.status || 'none';
+                const interactiveClass = isAdmin ? 'interactive' : '';
+                
+                let icon = '';
+                if (status === 'completed') icon = '✓';
+                else if (status === 'lost') icon = '✕';
+
+                descHtml += `
+                    <li class="task-item">
+                        <div class="task-label ${interactiveClass}" onclick="${interactiveClass ? `window.handleTaskToggle('${nodeData.id}', ${index})` : ''}">
+                            <div class="task-status-btn state-${status}">${icon}</div>
+                            <span class="task-text text-${status}">${task.text}</span>
+                        </div>
+                    </li>
+                `;
+            });
+            descHtml += '</ul>';
+        } else {
+            descHtml = "Сборный узел. Статус зависит от дочерних тем.";
+        }
+        
+        spDesc.innerHTML = descHtml;
+        if (window.MathJax) MathJax.typesetPromise([spDesc]).catch(err => console.error(err));
+    }
+
+    window.closePanel = function() {
+        document.getElementById('side-panel').classList.remove('open');
+        selectedNodeId = null;
+    }
+
+    initFirebase();
+</script>
+
+</body>
+</html>
