@@ -206,6 +206,16 @@
     let network;
     let selectedNodeId = null;
 
+    SYLLABUS_DATA.nodes.forEach(node => {
+        if (node.tasks) {
+            node.tasks.forEach(task => {
+                if (!task.status) {
+                    task.status = task.completed ? 'completed' : 'none';
+                }
+            });
+        }
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     let studentId = urlParams.get('student');
     let isAdmin = urlParams.get('admin') === 'true';
@@ -236,7 +246,8 @@
 
             await signInAnonymously(auth);
             
-            const docRef = doc(db, "students_geo", studentId);
+            // ВОЗВРАЩЕНО НА "students"
+            const docRef = doc(db, "students", studentId);
             
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -252,7 +263,6 @@
                 overlay.style.display = 'none';
             }, (error) => {
                 console.error("Ошибка Firebase Snapshot:", error);
-                // Показываем граф, даже если Firebase выдал ошибку доступа
                 if (!network) {
                     initGraph();
                 }
@@ -262,7 +272,6 @@
             
         } catch (error) {
             console.error(error);
-            // Если ошибка инициализации, всё равно убираем экран загрузки
             if (!network) {
                 initGraph();
             }
@@ -307,7 +316,8 @@
             if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
         });
         try {
-            await setDoc(doc(db, "students_geo", studentId), { progress }, { merge: true });
+            // ВОЗВРАЩЕНО НА "students"
+            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
         } catch (error) {
             console.error("Save Error:", error);
         }
@@ -324,10 +334,10 @@
             },
             edges: { width: 2, color: { color: '#444444', highlight: '#ffffff' }, smooth: false },
             groups: {
-                completed: { color: { background: '#1a3320', border: '#4CAF50', highlight: { background: '#254a2e', border: '#66bb6a' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(76, 175, 80, 0.4)', size: 15, x: 0, y: 0 } },
-                in_progress: { color: { background: '#332a00', border: '#FFC107', highlight: { background: '#4d4000', border: '#ffca28' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.15)', size: 10, x: 0, y: 0 } },
-                lost: { color: { background: '#3d1616', border: '#EF4444', highlight: { background: '#4d1c1c', border: '#f87171' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(239, 68, 68, 0.4)', size: 15, x: 0, y: 0 } },
-                locked: { color: { background: '#1e1e1e', border: '#333333', highlight: { background: '#2a2a2a', border: '#555555' } }, font: { color: '#777777' }, shadow: false }
+                completed: { color: { background: '#1a3320', border: '#4CAF50', highlight: { background: '#254a2e', border: '#66bb6a' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(76, 175, 80, 0.4)', size: 15, x: 0, y: 0 } },
+                in_progress: { color: { background: '#332a00', border: '#FFC107', highlight: { background: '#4d4000', border: '#ffca28' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: [5, 5] }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.15)', size: 10, x: 0, y: 0 } },
+                lost: { color: { background: '#3d1616', border: '#EF4444', highlight: { background: '#4d1c1c', border: '#f87171' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(239, 68, 68, 0.4)', size: 15, x: 0, y: 0 } },
+                locked: { color: { background: '#1e1e1e', border: '#333333', highlight: { background: '#2a2a2a', border: '#555555' } }, font: { color: '#777777' }, shapeProperties: { borderDashes: false }, shadow: false }
             },
             physics: { forceAtlas2Based: { gravitationalConstant: -220, centralGravity: 0.005, springLength: 150, springConstant: 0.12 }, solver: 'forceAtlas2Based', stabilization: { iterations: 150 } }
         };
