@@ -252,12 +252,21 @@
                 overlay.style.display = 'none';
             }, (error) => {
                 console.error("Ошибка Firebase Snapshot:", error);
-                overlay.innerHTML = "Ошибка доступа к Firebase. Проверьте Security Rules.";
+                // Показываем граф, даже если Firebase выдал ошибку доступа
+                if (!network) {
+                    initGraph();
+                }
+                overlay.style.display = 'none';
+                console.warn("ВНИМАНИЕ: Ошибка прав доступа к базе данных. Проверьте Security Rules в Firebase.");
             });
             
         } catch (error) {
             console.error(error);
-            overlay.innerHTML = "Ошибка инициализации Firebase.";
+            // Если ошибка инициализации, всё равно убираем экран загрузки
+            if (!network) {
+                initGraph();
+            }
+            overlay.style.display = 'none';
         }
     }
 
