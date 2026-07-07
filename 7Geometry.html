@@ -24,73 +24,26 @@
 
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #121212;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            color: #fff;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; color: #fff;
         }
-        #network-container {
-            width: 100%;
-            height: 100%;
-        }
+        #network-container { width: 100%; height: 100%; }
         #side-panel {
-            position: absolute;
-            top: 0;
-            right: -400px;
-            width: 350px;
-            height: 100%;
-            background-color: #1e1e1e;
-            color: #ffffff;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-            transition: right 0.3s ease;
-            padding: 20px;
-            box-sizing: border-box;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid #333;
+            position: absolute; top: 0; right: -400px; width: 350px; height: 100%;
+            background-color: #1e1e1e; color: #ffffff; box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+            transition: right 0.3s ease; padding: 20px; box-sizing: border-box;
+            z-index: 10; display: flex; flex-direction: column; border-left: 1px solid #333;
         }
-        #side-panel.open {
-            right: 0;
-        }
-        .panel-title {
-            font-size: 1.5em;
-            margin-top: 0;
-            margin-bottom: 5px;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        .panel-status {
-            font-size: 0.85em;
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .panel-desc {
-            font-size: 0.95em;
-            line-height: 1.5;
-            color: #b0b0b0;
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
+        #side-panel.open { right: 0; }
+        .panel-title { font-size: 1.5em; margin-top: 0; margin-bottom: 5px; color: #ffffff; font-weight: 600; }
+        .panel-status { font-size: 0.85em; margin-bottom: 20px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+        .panel-desc { font-size: 0.95em; line-height: 1.5; color: #b0b0b0; flex-grow: 1; overflow-y: auto; padding-right: 10px; }
         .panel-desc::-webkit-scrollbar { width: 4px; }
         .panel-desc::-webkit-scrollbar-thumb { background-color: #555; border-radius: 2px; }
         .close-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 1.2em;
-            cursor: pointer;
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            transition: color 0.2s;
+            background: none; border: none; color: #888; font-size: 1.2em;
+            cursor: pointer; position: absolute; top: 15px; right: 15px; transition: color 0.2s;
         }
         .close-btn:hover { color: #fff; }
         .status-completed { color: #81c784; }
@@ -98,96 +51,41 @@
         .status-locked { color: #888888; }
         .status-lost { color: #EF4444; }
         
-        .task-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 15px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-        }
+        .task-list { list-style: none; padding: 0; margin-top: 15px; border-top: 1px solid #333; padding-top: 20px; }
         .task-item { margin-bottom: 16px; }
-        
-        .task-label {
-            display: flex;
-            align-items: flex-start;
-            font-size: 0.95em;
-            position: relative;
-            cursor: default;
-        }
+        .task-label { display: flex; align-items: flex-start; font-size: 0.95em; position: relative; cursor: default; }
         .task-label.interactive { cursor: pointer; }
         
         .task-status-btn {
-            flex-shrink: 0;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #444;
-            border-radius: 4px;
-            margin-right: 12px;
-            margin-top: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.2s ease;
-            background-color: #2a2a2a;
-            user-select: none;
+            flex-shrink: 0; width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px;
+            margin-right: 12px; margin-top: 2px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold; transition: all 0.2s ease; background-color: #2a2a2a; user-select: none;
         }
         .task-label.interactive:hover .task-status-btn.state-none { border-color: #888; }
+        .task-status-btn.state-completed { background-color: #4CAF50; border-color: #4CAF50; color: white; }
+        .task-status-btn.state-lost { background-color: #EF4444; border-color: #EF4444; color: white; }
         
-        .task-status-btn.state-completed {
-            background-color: #4CAF50;
-            border-color: #4CAF50;
-            color: white;
-        }
-        .task-status-btn.state-lost {
-            background-color: #EF4444;
-            border-color: #EF4444;
-            color: white;
-        }
-        
-        .task-text {
-            line-height: 1.5;
-            display: inline;
-            word-break: break-word;
-            transition: color 0.2s;
-        }
+        .task-text { line-height: 1.5; display: inline; word-break: break-word; transition: color 0.2s; }
         .text-completed { color: #81c784; font-weight: 500; }
         .text-pending { color: #888888; }
         .text-lost { color: #EF4444; font-weight: 500; }
-        
         mjx-container[jax="SVG"] { color: inherit !important; }
 
         #admin-panel {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #1e1e1e;
-            border: 1px solid #4CAF50;
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 100;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: none; position: fixed; bottom: 20px; left: 20px; background: #1e1e1e;
+            border: 1px solid #4CAF50; padding: 15px; border-radius: 8px; z-index: 100;
+            color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         #system-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-family: monospace;
-            font-size: 1.2em;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #121212; display: flex; justify-content: center; align-items: center;
+            z-index: 1000; font-family: monospace; font-size: 1.2em;
         }
     </style>
 </head>
 <body>
 
 <div id="system-overlay">Инициализация...</div>
-
 <div id="network-container"></div>
 
 <div id="side-panel">
@@ -205,7 +103,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -221,122 +119,98 @@
         "nodes": [
             { "id": "geo7", "label": "Геометрия 7 класс", "group": "locked", "font": { "size": 20 } },
             
-            { "id": "branch_basics", "label": "Начальные сведения", "group": "locked" },
-            { "id": "branch_triangles", "label": "Треугольники", "group": "locked" },
-            { "id": "branch_parallel", "label": "Параллельность и углы", "group": "locked" },
-            { "id": "branch_circles", "label": "Окружность и построения", "group": "locked" },
-            
-            // НАЧАЛЬНЫЕ СВЕДЕНИЯ
-            {
-                "id": "node_lines_angles", "label": "Базовые объекты", "group": "locked",
-                "tasks": [
-                    { "text": "Распознавание, сравнение и измерение отрезков и углов", "completed": false },
-                    { "text": "Применение свойств смежных и вертикальных углов", "completed": false },
-                    { "text": "Построение перпендикулярных прямых", "completed": false },
-                    { "text": "Понимание структуры доказательства: различие аксиом и теорем", "completed": false }
-                ]
-            },
+            { "id": "base_branch", "label": "Базовые объекты", "group": "locked" },
+            { "id": "triangles_branch", "label": "Углы и Треугольники", "group": "locked" },
+            { "id": "circle_branch", "label": "Окружность", "group": "locked" },
+            { "id": "parallel_const_branch", "label": "Параллельность и Построения", "group": "locked" },
 
-            // ТРЕУГОЛЬНИКИ
-            {
-                "id": "node_triangles_intro", "label": "Свойства треугольника", "group": "locked",
-                "tasks": [
-                    { "text": "Идентификация элементов треугольника и вычисление периметра", "completed": false },
-                    { "text": "Построение и свойства медианы, биссектрисы и высоты", "completed": false },
-                    { "text": "Применение свойств равнобедренного и равностороннего треугольников", "completed": false }
-                ]
-            },
-            {
-                "id": "node_triangles_eq", "label": "Равенство треугольников", "group": "locked",
-                "tasks": [
-                    { "text": "Применение I признака равенства (по двум сторонам и углу между ними)", "completed": false },
-                    { "text": "Применение II признака равенства (по стороне и двум прилежащим углам)", "completed": false },
-                    { "text": "Применение III признака равенства (по трем сторонам)", "completed": false }
-                ]
-            },
+            { "id": "base_intro", "label": "Начальные сведения", "group": "locked", "tasks": [
+                { "text": "Распознавание и измерение отрезков (линейка)", "completed": false },
+                { "text": "Измерение и виды углов (транспортир)", "completed": false },
+                { "text": "Понятие равенства фигур при наложении", "completed": false }
+            ]},
+            { "id": "base_logic", "label": "Логика доказательств", "group": "locked", "tasks": [
+                { "text": "Аксиомы планиметрии", "completed": false },
+                { "text": "Структура теоремы (Дано, Доказать, Доказательство)", "completed": false }
+            ]},
 
-            // ПАРАЛЛЕЛЬНОСТЬ И УГЛЫ
-            {
-                "id": "node_parallel_rules", "label": "Параллельные прямые", "group": "locked",
-                "tasks": [
-                    { "text": "Распознавание накрест лежащих, соответственных и односторонних углов", "completed": false },
-                    { "text": "Доказательство и применение признаков параллельности прямых", "completed": false },
-                    { "text": "Использование аксиомы параллельных прямых в доказательствах", "completed": false }
-                ]
-            },
-            {
-                "id": "node_triangle_sum", "label": "Углы треугольника", "group": "locked",
-                "tasks": [
-                    { "text": "Применение теоремы о сумме углов треугольника ($180^\\circ$)", "completed": false },
-                    { "text": "Вычисление и использование свойств внешнего угла треугольника", "completed": false }
-                ]
-            },
-            {
-                "id": "node_right_triangles", "label": "Прямоугольные треугольники", "group": "locked",
-                "tasks": [
-                    { "text": "Применение свойств прямоугольного треугольника (катеты, гипотенуза)", "completed": false },
-                    { "text": "Использование специфических признаков равенства прямоугольных треугольников", "completed": false },
-                    { "text": "Анализ свойств перпендикуляра, наклонной и её проекции", "completed": false }
-                ]
-            },
+            { "id": "angles_basic", "label": "Взаимодействие углов", "group": "locked", "tasks": [
+                { "text": "Смежные углы (сумма $180^\\circ$)", "completed": false },
+                { "text": "Вертикальные углы (равенство)", "completed": false }
+            ]},
+            { "id": "tri_elements", "label": "Элементы треугольника", "group": "locked", "tasks": [
+                { "text": "Вершины, стороны, углы и вычисление периметра", "completed": false },
+                { "text": "Построение медианы, биссектрисы и высоты", "completed": false }
+            ]},
+            { "id": "tri_types", "label": "Виды треугольников", "group": "locked", "tasks": [
+                { "text": "Теорема о сумме углов треугольника ($180^\\circ$)", "completed": false },
+                { "text": "Свойства равнобедренного и равностороннего треугольников", "completed": false },
+                { "text": "Прямоугольный треугольник (катет напротив $30^\\circ$)", "completed": false }
+            ]},
+            { "id": "tri_eq", "label": "Равенство треугольников", "group": "locked", "tasks": [
+                { "text": "I признак (по двум сторонам и углу)", "completed": false },
+                { "text": "II признак (по стороне и прилежащим углам)", "completed": false },
+                { "text": "III признак (по трем сторонам)", "completed": false }
+            ]},
 
-            // ОКРУЖНОСТЬ И ПОСТРОЕНИЯ
-            {
-                "id": "node_circle_elements", "label": "Окружность", "group": "locked",
-                "tasks": [
-                    { "text": "Идентификация центра, радиуса, диаметра и хорды", "completed": false },
-                    { "text": "Применение свойств касательной и секущей к окружности", "completed": false },
-                    { "text": "Вычисление градусной меры центрального угла и дуги", "completed": false }
-                ]
-            },
-            {
-                "id": "node_constructions", "label": "Геометрические построения", "group": "locked",
-                "tasks": [
-                    { "text": "Построение отрезка и угла, равного данному (циркулем и линейкой)", "completed": false },
-                    { "text": "Построение биссектрисы угла и серединного перпендикуляра к отрезку", "completed": false },
-                    { "text": "Построение прямой, параллельной данной", "completed": false },
-                    { "text": "Построение треугольника по трем заданным элементам", "completed": false }
-                ]
-            }
+            { "id": "circ_elements", "label": "Элементы окружности", "group": "locked", "tasks": [
+                { "text": "Радиус, хорда, диаметр", "completed": false },
+                { "text": "Отличие круга от окружности", "completed": false }
+            ]},
+            { "id": "circ_tangent", "label": "Касательная", "group": "locked", "tasks": [
+                { "text": "Определение касательной", "completed": false },
+                { "text": "Свойство перпендикулярности радиусу", "completed": false }
+            ]},
+
+            { "id": "parallel_angles", "label": "Углы при секущей", "group": "locked", "tasks": [
+                { "text": "Накрест лежащие углы", "completed": false },
+                { "text": "Соответственные углы", "completed": false },
+                { "text": "Односторонние углы", "completed": false }
+            ]},
+            { "id": "parallel_rules", "label": "Параллельные прямые", "group": "locked", "tasks": [
+                { "text": "Признаки параллельности прямых", "completed": false },
+                { "text": "Свойства параллельных прямых", "completed": false }
+            ]},
+            { "id": "constructions", "label": "Геометрические построения", "group": "locked", "tasks": [
+                { "text": "Построение перпендикулярных прямых", "completed": false },
+                { "text": "Откладывание отрезка и угла, равных данным", "completed": false },
+                { "text": "Построение биссектрисы и серединного перпендикуляра", "completed": false }
+            ]}
         ],
         "edges": [
-            { "from": "geo7", "to": "branch_basics", "length": 200 }, 
-            { "from": "geo7", "to": "branch_triangles", "length": 200 }, 
-            { "from": "geo7", "to": "branch_parallel", "length": 200 }, 
-            { "from": "geo7", "to": "branch_circles", "length": 200 },
+            { "from": "geo7", "to": "base_branch", "length": 250 },
+            { "from": "geo7", "to": "triangles_branch", "length": 250 },
+            { "from": "geo7", "to": "circle_branch", "length": 250 },
+            { "from": "geo7", "to": "parallel_const_branch", "length": 250 },
 
-            // Начальные сведения
-            { "from": "branch_basics", "to": "node_lines_angles", "length": 150 }, 
+            { "from": "base_branch", "to": "base_intro", "length": 150 },
+            { "from": "base_branch", "to": "base_logic", "length": 150 },
 
-            // Треугольники
-            { "from": "branch_triangles", "to": "node_triangles_intro", "length": 150 }, 
-            { "from": "branch_triangles", "to": "node_triangles_eq", "length": 150 }, 
+            { "from": "triangles_branch", "to": "angles_basic", "length": 150 },
+            { "from": "triangles_branch", "to": "tri_elements", "length": 150 },
+            { "from": "triangles_branch", "to": "tri_types", "length": 150 },
+            { "from": "triangles_branch", "to": "tri_eq", "length": 150 },
 
-            // Параллельность
-            { "from": "branch_parallel", "to": "node_parallel_rules", "length": 150 }, 
-            { "from": "branch_parallel", "to": "node_triangle_sum", "length": 150 }, 
-            { "from": "branch_parallel", "to": "node_right_triangles", "length": 150 }, 
+            { "from": "circle_branch", "to": "circ_elements", "length": 150 },
+            { "from": "circle_branch", "to": "circ_tangent", "length": 150 },
 
-            // Окружности и построения
-            { "from": "branch_circles", "to": "node_circle_elements", "length": 150 }, 
-            { "from": "branch_circles", "to": "node_constructions", "length": 150 }
+            { "from": "parallel_const_branch", "to": "parallel_angles", "length": 150 },
+            { "from": "parallel_const_branch", "to": "parallel_rules", "length": 150 },
+            { "from": "parallel_const_branch", "to": "constructions", "length": 150 }
         ]
     };
 
-    SYLLABUS_DATA.nodes.forEach(node => {
-        if (node.tasks) {
-            node.tasks.forEach(task => {
-                if (!task.status) {
-                    task.status = task.completed ? 'completed' : 'none';
-                }
-            });
-        }
-    });
-    
-    const normalizedSearch = window.location.search.replace(/\?/g, '&').replace('&', '?');
-    const urlParams = new URLSearchParams(normalizedSearch);
+    let db;
+    let auth;
+    let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
+    let edgesData = new vis.DataSet(SYLLABUS_DATA.edges);
+    let network;
+    let selectedNodeId = null;
+
+    const urlParams = new URLSearchParams(window.location.search);
     let studentId = urlParams.get('student');
     let isAdmin = urlParams.get('admin') === 'true';
+    let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
     if (!studentId) {
         studentId = 'demo_student_geo7';
@@ -350,47 +224,63 @@
         document.getElementById('admin-student-name').innerText = `Редактирование профиля: ${studentId}`;
     }
 
-    let db;
-    let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
-    let edgesData = new vis.DataSet(SYLLABUS_DATA.edges);
-    let network;
-    let selectedNodeId = null;
+    let usingCanvasConfig = false;
+
+    try {
+        if (typeof __firebase_config !== 'undefined') {
+            const fbConfig = JSON.parse(__firebase_config);
+            const appFirebase = initializeApp(fbConfig);
+            auth = getAuth(appFirebase);
+            db = getFirestore(appFirebase);
+            usingCanvasConfig = true;
+        } else if (Object.keys(firebaseConfig).length > 0) {
+            const appFirebase = initializeApp(firebaseConfig);
+            auth = getAuth(appFirebase);
+            db = getFirestore(appFirebase);
+        }
+    } catch (e) {
+        console.error("Ошибка инициализации Firebase:", e);
+    }
 
     async function initFirebase() {
-        const fallbackInit = () => {
-            if (!network) {
-                initGraph();
-            }
+        if (!db) {
             overlay.style.display = 'none';
-        };
-
-        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
-            fallbackInit();
+            initGraph();
             return;
         }
 
         try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            db = getFirestore(app);
-
-            await signInAnonymously(auth);
+            if (auth) {
+                if (usingCanvasConfig && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            }
             
-            const docRef = doc(db, "students_geo", studentId);
+            // Используем корректный путь для среды Canvas
+            const docRef = doc(db, "artifacts", appId, "public", "data", "students_geo", studentId);
+            
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data().progress;
                     applyProgress(data);
+                } else {
+                    saveToFirebase();
                 }
-                fallbackInit();
+                
+                if (!network) {
+                    initGraph();
+                }
+                overlay.style.display = 'none';
             }, (error) => {
-                console.error("Ошибка чтения Firebase:", error);
-                fallbackInit(); 
+                console.error("Firebase Snapshot Error:", error);
+                overlay.innerHTML = "Ошибка доступа к Firebase. Проверьте Security Rules.";
             });
             
         } catch (error) {
-            console.error("Ошибка инициализации Firebase:", error);
-            fallbackInit(); 
+            console.error(error);
+            overlay.innerHTML = "Ошибка инициализации Firebase.";
         }
     }
 
@@ -431,9 +321,10 @@
             if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
         });
         try {
-            await setDoc(doc(db, "students_geo", studentId), { progress }, { merge: true });
+            const docRef = doc(db, "artifacts", appId, "public", "data", "students_geo", studentId);
+            await setDoc(docRef, { progress }, { merge: true });
         } catch (error) {
-            console.error("Ошибка записи:", error);
+            console.error("Save Error:", error);
         }
     }
 
@@ -448,12 +339,12 @@
             },
             edges: { width: 2, color: { color: '#444444', highlight: '#ffffff' }, smooth: false },
             groups: {
-                completed: { color: { background: '#1a3320', border: '#4CAF50', highlight: { background: '#254a2e', border: '#66bb6a' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(76, 175, 80, 0.4)', size: 15, x: 0, y: 0 } },
-                in_progress: { color: { background: '#332a00', border: '#FFC107', highlight: { background: '#4d4000', border: '#ffca28' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: [5, 5] }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.15)', size: 10, x: 0, y: 0 } },
-                lost: { color: { background: '#3d1616', border: '#EF4444', highlight: { background: '#4d1c1c', border: '#f87171' } }, font: { color: '#ffffff' }, shapeProperties: { borderDashes: false }, shadow: { enabled: true, color: 'rgba(239, 68, 68, 0.4)', size: 15, x: 0, y: 0 } },
-                locked: { color: { background: '#1e1e1e', border: '#333333', highlight: { background: '#2a2a2a', border: '#555555' } }, font: { color: '#777777' }, shapeProperties: { borderDashes: false }, shadow: false }
+                completed: { color: { background: '#1a3320', border: '#4CAF50', highlight: { background: '#254a2e', border: '#66bb6a' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(76, 175, 80, 0.4)', size: 15, x: 0, y: 0 } },
+                in_progress: { color: { background: '#332a00', border: '#FFC107', highlight: { background: '#4d4000', border: '#ffca28' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.15)', size: 10, x: 0, y: 0 } },
+                lost: { color: { background: '#3d1616', border: '#EF4444', highlight: { background: '#4d1c1c', border: '#f87171' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(239, 68, 68, 0.4)', size: 15, x: 0, y: 0 } },
+                locked: { color: { background: '#1e1e1e', border: '#333333', highlight: { background: '#2a2a2a', border: '#555555' } }, font: { color: '#777777' }, shadow: false }
             },
-            physics: { forceAtlas2Based: { gravitationalConstant: -220, centralGravity: 0.005, springLength: 150, springConstant: 0.12 }, maxVelocity: 50, solver: 'forceAtlas2Based', timestep: 0.35, stabilization: { iterations: 150 } }
+            physics: { forceAtlas2Based: { gravitationalConstant: -220, centralGravity: 0.005, springLength: 150, springConstant: 0.12 }, solver: 'forceAtlas2Based', stabilization: { iterations: 150 } }
         };
 
         network = new vis.Network(container, data, options);
@@ -462,8 +353,13 @@
         network.on("click", function (params) {
             if (params.nodes.length > 0) {
                 selectedNodeId = params.nodes[0];
-                updateSidePanel(nodesData.get(selectedNodeId));
-                document.getElementById('side-panel').classList.add('open');
+                const nodeData = nodesData.get(selectedNodeId);
+                if (nodeData.tasks || nodeData.group === 'lost' || nodeData.group === 'completed') {
+                    updateSidePanel(nodeData);
+                    document.getElementById('side-panel').classList.add('open');
+                } else {
+                    window.closePanel();
+                }
             } else {
                 window.closePanel();
             }
@@ -498,12 +394,13 @@
                 return;
             }
 
+            children.forEach(childId => evalNode(childId)); 
+
             let allCompleted = true; 
             let allLocked = true;
             let anyLost = false;
 
             children.forEach(childId => {
-                evalNode(childId); 
                 const childNode = nodesData.get(childId);
                 if (childNode.group === 'lost') anyLost = true;
                 if (childNode.group !== 'completed') allCompleted = false;
@@ -556,15 +453,15 @@
         if (nodeData.group === 'completed') {
             spStatus.innerText = 'Статус: Изучено'; spStatus.classList.add('status-completed');
         } else if (nodeData.group === 'lost') {
-            spStatus.innerText = 'Статус: Требует повторения'; spStatus.classList.add('status-lost');
+            spStatus.innerText = 'Статус: Проблемная тема'; spStatus.classList.add('status-lost');
         } else if (nodeData.group === 'in_progress') {
             spStatus.innerText = 'Статус: В процессе'; spStatus.classList.add('status-in_progress');
         } else {
-            spStatus.innerText = 'Статус: Заблокировано'; spStatus.classList.add('status-locked');
+            spStatus.innerText = 'Статус: Не изучалось'; spStatus.classList.add('status-locked');
         }
         
         let descHtml = "";
-        if (nodeData.tasks && nodeData.tasks.length > 0) {
+        if (nodeData.tasks) {
             descHtml += '<ul class="task-list">';
             nodeData.tasks.forEach((task, index) => {
                 const status = task.status || 'none';
@@ -585,11 +482,13 @@
             });
             descHtml += '</ul>';
         } else {
-            descHtml = "Сборный узел. Статус зависит от дочерних тем.";
+            descHtml = "Родительский раздел. Статус вычисляется на основе дочерних тем.";
         }
         
         spDesc.innerHTML = descHtml;
-        if (window.MathJax) MathJax.typesetPromise([spDesc]).catch(err => console.error(err));
+        if (window.MathJax) {
+            MathJax.typesetPromise([spDesc]).catch(err => console.error("MathJax Error:", err));
+        }
     }
 
     window.closePanel = function() {
