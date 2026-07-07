@@ -103,7 +103,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -201,7 +201,6 @@
     };
 
     let db;
-    let auth;
     let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
     let edgesData = new vis.DataSet(SYLLABUS_DATA.edges);
     let network;
@@ -210,7 +209,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     let studentId = urlParams.get('student');
     let isAdmin = urlParams.get('admin') === 'true';
-    let appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
     if (!studentId) {
         studentId = 'demo_student_geo7';
@@ -224,42 +222,21 @@
         document.getElementById('admin-student-name').innerText = `Редактирование профиля: ${studentId}`;
     }
 
-    let usingCanvasConfig = false;
-
-    try {
-        if (typeof __firebase_config !== 'undefined') {
-            const fbConfig = JSON.parse(__firebase_config);
-            const appFirebase = initializeApp(fbConfig);
-            auth = getAuth(appFirebase);
-            db = getFirestore(appFirebase);
-            usingCanvasConfig = true;
-        } else if (Object.keys(firebaseConfig).length > 0) {
-            const appFirebase = initializeApp(firebaseConfig);
-            auth = getAuth(appFirebase);
-            db = getFirestore(appFirebase);
-        }
-    } catch (e) {
-        console.error("Ошибка инициализации Firebase:", e);
-    }
-
     async function initFirebase() {
-        if (!db) {
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
             overlay.style.display = 'none';
             initGraph();
             return;
         }
 
         try {
-            if (auth) {
-                if (usingCanvasConfig && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            }
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            db = getFirestore(app);
+
+            await signInAnonymously(auth);
             
-            // Используем корректный путь для среды Canvas
-            const docRef = doc(db, "artifacts", appId, "public", "data", "students_geo", studentId);
+            const docRef = doc(db, "students_geo", studentId);
             
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -274,7 +251,7 @@
                 }
                 overlay.style.display = 'none';
             }, (error) => {
-                console.error("Firebase Snapshot Error:", error);
+                console.error("Ошибка Firebase Snapshot:", error);
                 overlay.innerHTML = "Ошибка доступа к Firebase. Проверьте Security Rules.";
             });
             
@@ -321,8 +298,7 @@
             if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
         });
         try {
-            const docRef = doc(db, "artifacts", appId, "public", "data", "students_geo", studentId);
-            await setDoc(docRef, { progress }, { merge: true });
+            await setDoc(doc(db, "students_geo", studentId), { progress }, { merge: true });
         } catch (error) {
             console.error("Save Error:", error);
         }
