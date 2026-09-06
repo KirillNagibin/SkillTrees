@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дерево навыков: Математика ЕГЭ</title>
+    
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+        #network-container {
+            width: 100%;
+            height: 100%;
+        }
+        #side-panel {
+            position: absolute;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+            transition: right 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #333;
+        }
+        #side-panel.open {
+            right: 0;
+        }
+        .panel-title {
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .panel-status {
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .panel-desc {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #b0b0b0;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .panel-desc::-webkit-scrollbar { width: 4px; }
+        .panel-desc::-webkit-scrollbar-thumb { background-color: #555; border-radius: 2px; }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.2em;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            transition: color 0.2s;
+        }
+        .close-btn:hover { color: #fff; }
+        .status-completed { color: #81c784; }
+        .status-in_progress { color: #ffd54f; }
+        .status-locked { color: #888888; }
+        .status-lost { color: #EF4444; }
+        
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .task-item { margin-bottom: 16px; }
+        
+        .task-label {
+            display: flex;
+            align-items: flex-start;
+            font-size: 0.95em;
+            position: relative;
+            cursor: default;
+        }
+        .task-label.interactive { cursor: pointer; }
+        
+        .task-status-btn {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #444;
+            border-radius: 4px;
+            margin-right: 12px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            background-color: #2a2a2a;
+            user-select: none;
+        }
+        .task-label.interactive:hover .task-status-btn.state-none { border-color: #888; }
+        
+        .task-status-btn.state-completed {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+        .task-status-btn.state-lost {
+            background-color: #EF4444;
+            border-color: #EF4444;
+            color: white;
+        }
+        
+        .task-text {
+            line-height: 1.5;
+            display: inline;
+            word-break: break-word;
+            transition: color 0.2s;
+        }
+        .text-completed { color: #81c784; font-weight: 500; }
+        .text-pending { color: #888888; }
+        .text-lost { color: #EF4444; font-weight: 500; }
+        
+        mjx-container[jax="SVG"] { color: inherit !important; }
+
+        #admin-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #1e1e1e;
+            border: 1px solid #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #system-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+<div id="system-overlay">Инициализация...</div>
+
+<div id="network-container"></div>
+
+<div id="side-panel">
+    <button class="close-btn" onclick="closePanel()">✕</button>
+    <h2 id="sp-title" class="panel-title">Название</h2>
+    <div id="sp-status" class="panel-status">Статус: ...</div>
+    <div id="sp-desc" class="panel-desc">Описание.</div>
+</div>
+
+<div id="admin-panel">
+    <h3 style="margin-top:0; font-size: 1em; color: #4CAF50;">Режим преподавателя</h3>
+    <p id="admin-student-name" style="font-size: 0.8em; color: #bbb; margin: 5px 0 0 0;"></p>
+    <p style="font-size: 0.8em; color: #888; margin: 5px 0 0 0;">Изменения сохраняются автоматически.</p>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAzMNW7xdVazEUnJiKoYPN8laMWD1BZqCw",
+        authDomain: "physicsskilltree.firebaseapp.com",
+        projectId: "physicsskilltree",
+        storageBucket: "physicsskilltree.firebasestorage.app",
+        messagingSenderId: "414823459706",
+        appId: "1:414823459706:web:80e86f596c6e9f2c4704c3"
+    };
+
+    const SYLLABUS_DATA = {
+        "nodes": [
+            { "id": "math_ege", "label": "Математика ЕГЭ", "group": "locked", "font": { "size": 20 } },
+            
+            { "id": "alg_branch", "label": "Алгебра и преобразования", "group": "locked" },
+            { "id": "eq_branch", "label": "Уравнения и неравенства", "group": "locked" },
+            { "id": "func_branch", "label": "Функции и графики", "group": "locked" },
+            { "id": "analysis_branch", "label": "Начала математического анализа", "group": "locked" },
+            { "id": "geo_branch", "label": "Геометрия", "group": "locked" },
+            { "id": "prob_branch", "label": "Комбинаторика и вероятность", "group": "locked" },
+            
+            // --- АЛГЕБРА И ПРЕОБРАЗОВАНИЯ ---
+            {
+                "id": "alg_numbers", "label": "Числа и вычисления", "group": "locked",
+                "tasks": [
+                    { "text": "Дроби, проценты, пропорции", "completed": false },
+                    { "text": "Степень с целым показателем", "completed": false },
+                    { "text": "Корень n-й степени", "completed": false },
+                    { "text": "Модуль числа и выражения", "completed": false }
+                ]
+            },
+            {
+                "id": "alg_log", "label": "Логарифмы", "group": "locked",
+                "tasks": [
+                    { "text": "Определение логарифма ($\\log_a b = x \\Leftrightarrow a^x = b$)", "completed": false },
+                    { "text": "Свойства логарифмов ($\\log_a (bc) = \\log_a b + \\log_a c$ и др.)", "completed": false },
+                    { "text": "Десятичные и натуральные логарифмы", "completed": false },
+                    { "text": "Переход к новому основанию", "completed": false }
+                ]
+            },
+            {
+                "id": "alg_trig", "label": "Тригонометрические преобразования", "group": "locked",
+                "tasks": [
+                    { "text": "Основное тригонометрическое тождество ($\\sin^2 x + \\cos^2 x = 1$)", "completed": false },
+                    { "text": "Формулы двойного угла ($\\sin 2x = 2\\sin x \\cos x$)", "completed": false },
+                    { "text": "Формулы приведения", "completed": false },
+                    { "text": "Сумма и разность тригонометрических функций", "completed": false }
+                ]
+            },
+            {
+                "id": "alg_prog", "label": "Прогрессии", "group": "locked",
+                "tasks": [
+                    { "text": "Арифметическая прогрессия: $a_n = a_1 + (n-1)d$, $S_n = \\frac{a_1+a_n}{2}n$", "completed": false },
+                    { "text": "Геометрическая прогрессия: $b_n = b_1 q^{n-1}$, $S_n = \\frac{b_1(1-q^n)}{1-q}$", "completed": false },
+                    { "text": "Бесконечно убывающая геометрическая прогрессия", "completed": false }
+                ]
+            },
+
+            // --- УРАВНЕНИЯ И НЕРАВЕНСТВА ---
+            {
+                "id": "eq_rat", "label": "Рациональные уравнения и неравенства", "group": "locked",
+                "tasks": [
+                    { "text": "Линейные и квадратные уравнения", "completed": false },
+                    { "text": "Метод интервалов для рациональных неравенств", "completed": false },
+                    { "text": "Дробно-рациональные уравнения", "completed": false }
+                ]
+            },
+            {
+                "id": "eq_irr", "label": "Иррациональные уравнения", "group": "locked",
+                "tasks": [
+                    { "text": "Решение уравнений вида $\\sqrt{f(x)} = g(x)$", "completed": false },
+                    { "text": "Метод возведения в квадрат с проверкой", "completed": false }
+                ]
+            },
+            {
+                "id": "eq_exp_log", "label": "Показательные и логарифмические уравнения и неравенства", "group": "locked",
+                "tasks": [
+                    { "text": "Показательные уравнения: $a^{f(x)} = a^{g(x)} \\Leftrightarrow f(x)=g(x)$", "completed": false },
+                    { "text": "Логарифмические уравнения: $\\log_a f(x) = \\log_a g(x) \\Leftrightarrow f(x)=g(x)>0$", "completed": false },
+                    { "text": "Показательные и логарифмические неравенства с учетом ОДЗ и монотонности", "completed": false }
+                ]
+            },
+            {
+                "id": "eq_trig", "label": "Тригонометрические уравнения", "group": "locked",
+                "tasks": [
+                    { "text": "Простейшие тригонометрические уравнения ($\\sin x = a$, $\\cos x = a$, $\\tan x = a$)", "completed": false },
+                    { "text": "Методы решения (разложение на множители, замена переменной)", "completed": false },
+                    { "text": "Отбор корней на промежутке", "completed": false }
+                ]
+            },
+            {
+                "id": "eq_sys", "label": "Системы уравнений", "group": "locked",
+                "tasks": [
+                    { "text": "Системы линейных уравнений", "completed": false },
+                    { "text": "Системы с нелинейными уравнениями", "completed": false },
+                    { "text": "Методы подстановки и сложения", "completed": false }
+                ]
+            },
+
+            // --- ФУНКЦИИ И ГРАФИКИ ---
+            {
+                "id": "func_elem", "label": "Основные элементарные функции", "group": "locked",
+                "tasks": [
+                    { "text": "Линейная, квадратичная, степенная функции", "completed": false },
+                    { "text": "Показательная и логарифмическая функции", "completed": false },
+                    { "text": "Тригонометрические функции", "completed": false }
+                ]
+            },
+            {
+                "id": "func_props", "label": "Свойства функций", "group": "locked",
+                "tasks": [
+                    { "text": "Область определения и множество значений", "completed": false },
+                    { "text": "Четность, нечетность, периодичность", "completed": false },
+                    { "text": "Монотонность, экстремумы", "completed": false }
+                ]
+            },
+            {
+                "id": "func_trans", "label": "Преобразования графиков", "group": "locked",
+                "tasks": [
+                    { "text": "Сдвиги: $y = f(x) + c$, $y = f(x+c)$", "completed": false },
+                    { "text": "Растяжение/сжатие: $y = k f(x)$, $y = f(kx)$", "completed": false },
+                    { "text": "Симметрия относительно осей и начала координат", "completed": false }
+                ]
+            },
+            {
+                "id": "func_read", "label": "Чтение графиков и диаграмм", "group": "locked",
+                "tasks": [
+                    { "text": "Определение свойств функции по графику", "completed": false },
+                    { "text": "Анализ графиков производной", "completed": false },
+                    { "text": "Интерпретация диаграмм и таблиц", "completed": false }
+                ]
+            },
+
+            // --- НАЧАЛА МАТЕМАТИЧЕСКОГО АНАЛИЗА ---
+            {
+                "id": "an_der", "label": "Производная и правила дифференцирования", "group": "locked",
+                "tasks": [
+                    { "text": "Определение производной, физический смысл", "completed": false },
+                    { "text": "Таблица производных основных функций", "completed": false },
+                    { "text": "Правила дифференцирования (сумма, произведение, частное, сложная функция)", "completed": false }
+                ]
+            },
+            {
+                "id": "an_geom", "label": "Геометрический смысл производной", "group": "locked",
+                "tasks": [
+                    { "text": "Уравнение касательной к графику функции", "completed": false },
+                    { "text": "Угловой коэффициент касательной", "completed": false }
+                ]
+            },
+            {
+                "id": "an_app", "label": "Применение производной к исследованию функций", "group": "locked",
+                "tasks": [
+                    { "text": "Нахождение промежутков монотонности", "completed": false },
+                    { "text": "Нахождение точек экстремума", "completed": false },
+                    { "text": "Наибольшее и наименьшее значение функции на отрезке", "completed": false }
+                ]
+            },
+            {
+                "id": "an_integ", "label": "Первообразная и интеграл", "group": "locked",
+                "tasks": [
+                    { "text": "Первообразная, правила нахождения", "completed": false },
+                    { "text": "Определенный интеграл и площадь криволинейной трапеции", "completed": false },
+                    { "text": "Формула Ньютона-Лейбница", "completed": false }
+                ]
+            },
+
+            // --- ГЕОМЕТРИЯ ---
+            {
+                "id": "geo_plan", "label": "Планиметрия", "group": "locked",
+                "tasks": [
+                    { "text": "Треугольники: виды, свойства, теоремы (Пифагора, синусов, косинусов)", "completed": false },
+                    { "text": "Четырехугольники: параллелограмм, прямоугольник, ромб, трапеция", "completed": false },
+                    { "text": "Окружность, круг, вписанные и описанные углы", "completed": false },
+                    { "text": "Площади фигур", "completed": false }
+                ]
+            },
+            {
+                "id": "geo_vect", "label": "Векторы и координаты на плоскости", "group": "locked",
+                "tasks": [
+                    { "text": "Координаты вектора, длина вектора", "completed": false },
+                    { "text": "Скалярное произведение векторов", "completed": false },
+                    { "text": "Уравнение прямой, расстояние между точками", "completed": false }
+                ]
+            },
+            {
+                "id": "geo_poly", "label": "Многогранники", "group": "locked",
+                "tasks": [
+                    { "text": "Призма, параллелепипед: площадь поверхности, объем", "completed": false },
+                    { "text": "Пирамида: площадь поверхности, объем", "completed": false },
+                    { "text": "Построение сечений", "completed": false }
+                ]
+            },
+            {
+                "id": "geo_rot", "label": "Тела вращения", "group": "locked",
+                "tasks": [
+                    { "text": "Цилиндр: площадь поверхности, объем", "completed": false },
+                    { "text": "Конус: площадь поверхности, объем", "completed": false },
+                    { "text": "Шар, сфера: площадь поверхности, объем", "completed": false }
+                ]
+            },
+            {
+                "id": "geo_coord3d", "label": "Координаты в пространстве", "group": "locked",
+                "tasks": [
+                    { "text": "Расстояние между точками в пространстве", "completed": false },
+                    { "text": "Векторы в пространстве", "completed": false },
+                    { "text": "Угол между прямыми и плоскостями (векторный метод)", "completed": false }
+                ]
+            },
+
+            // --- КОМБИНАТОРИКА И ВЕРОЯТНОСТЬ ---
+            {
+                "id": "prob_comb", "label": "Комбинаторика", "group": "locked",
+                "tasks": [
+                    { "text": "Правило умножения и сложения", "completed": false },
+                    { "text": "Перестановки, размещения, сочетания", "completed": false },
+                    { "text": "Бином Ньютона (возможно)", "completed": false }
+                ]
+            },
+            {
+                "id": "prob_class", "label": "Классическая вероятность", "group": "locked",
+                "tasks": [
+                    { "text": "Определение вероятности: $P(A) = \\frac{m}{n}$", "completed": false },
+                    { "text": "Решение задач на бросание кубика, монеты, выбор карт", "completed": false },
+                    { "text": "Противоположные события", "completed": false }
+                ]
+            },
+            {
+                "id": "prob_theor", "label": "Теоремы о вероятностях", "group": "locked",
+                "tasks": [
+                    { "text": "Сложение вероятностей для несовместных событий", "completed": false },
+                    { "text": "Умножение вероятностей для независимых событий", "completed": false },
+                    { "text": "Условная вероятность", "completed": false }
+                ]
+            },
+            {
+                "id": "prob_stat", "label": "Статистика", "group": "locked",
+                "tasks": [
+                    { "text": "Среднее арифметическое, медиана, размах", "completed": false },
+                    { "text": "Дисперсия и стандартное отклонение", "completed": false },
+                    { "text": "Анализ таблиц и диаграмм", "completed": false }
+                ]
+            }
+        ],
+        "edges": [
+            { "from": "math_ege", "to": "alg_branch", "length": 250 }, 
+            { "from": "math_ege", "to": "eq_branch", "length": 250 }, 
+            { "from": "math_ege", "to": "func_branch", "length": 250 }, 
+            { "from": "math_ege", "to": "analysis_branch", "length": 250 }, 
+            { "from": "math_ege", "to": "geo_branch", "length": 250 },
+            { "from": "math_ege", "to": "prob_branch", "length": 250 },
+
+            // Алгебра и преобразования
+            { "from": "alg_branch", "to": "alg_numbers", "length": 150 }, 
+            { "from": "alg_branch", "to": "alg_log", "length": 150 }, 
+            { "from": "alg_branch", "to": "alg_trig", "length": 150 }, 
+            { "from": "alg_branch", "to": "alg_prog", "length": 150 }, 
+
+            // Уравнения и неравенства
+            { "from": "eq_branch", "to": "eq_rat", "length": 150 }, 
+            { "from": "eq_branch", "to": "eq_irr", "length": 150 }, 
+            { "from": "eq_branch", "to": "eq_exp_log", "length": 150 }, 
+            { "from": "eq_branch", "to": "eq_trig", "length": 150 }, 
+            { "from": "eq_branch", "to": "eq_sys", "length": 150 }, 
+
+            // Функции и графики
+            { "from": "func_branch", "to": "func_elem", "length": 150 }, 
+            { "from": "func_branch", "to": "func_props", "length": 150 }, 
+            { "from": "func_branch", "to": "func_trans", "length": 150 }, 
+            { "from": "func_branch", "to": "func_read", "length": 150 }, 
+
+            // Начала математического анализа
+            { "from": "analysis_branch", "to": "an_der", "length": 150 }, 
+            { "from": "analysis_branch", "to": "an_geom", "length": 150 }, 
+            { "from": "analysis_branch", "to": "an_app", "length": 150 }, 
+            { "from": "analysis_branch", "to": "an_integ", "length": 150 }, 
+
+            // Геометрия
+            { "from": "geo_branch", "to": "geo_plan", "length": 150 }, 
+            { "from": "geo_branch", "to": "geo_vect", "length": 150 }, 
+            { "from": "geo_branch", "to": "geo_poly", "length": 150 }, 
+            { "from": "geo_branch", "to": "geo_rot", "length": 150 }, 
+            { "from": "geo_branch", "to": "geo_coord3d", "length": 150 }, 
+
+            // Комбинаторика и вероятность
+            { "from": "prob_branch", "to": "prob_comb", "length": 150 }, 
+            { "from": "prob_branch", "to": "prob_class", "length": 150 }, 
+            { "from": "prob_branch", "to": "prob_theor", "length": 150 }, 
+            { "from": "prob_branch", "to": "prob_stat", "length": 150 }
+        ]
+    };
+
+    let db;
+    let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
+    let edgesData = new vis.DataSet(SYLLABUS_DATA.edges);
+    let network;
+    let selectedNodeId = null;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let studentId = urlParams.get('student');
+    let isAdmin = urlParams.get('admin') === 'true';
+
+    if (!studentId) {
+        studentId = 'demo_student_math';
+        isAdmin = true;
+    }
+
+    const overlay = document.getElementById('system-overlay');
+
+    if (isAdmin) {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-student-name').innerText = `Редактирование профиля: ${studentId}`;
+    }
+
+    async function initFirebase() {
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+            overlay.style.display = 'none';
+            initGraph();
+            return;
+        }
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            db = getFirestore(app);
+
+            await signInAnonymously(auth);
+            
+            const docRef = doc(db, "students", studentId);
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data().progress;
+                    applyProgress(data);
+                } else {
+                    saveToFirebase();
+                }
+                
+                if (!network) {
+                    initGraph();
+                }
+                overlay.style.display = 'none';
+            }, (error) => {
+                console.error("Ошибка Firebase Snapshot:", error);
+                overlay.innerHTML = "Ошибка доступа к Firebase. Проверьте Security Rules.";
+            });
+            
+        } catch (error) {
+            console.error(error);
+            overlay.innerHTML = "Ошибка инициализации Firebase.";
+        }
+    }
+
+    function applyProgress(data) {
+        if (!data) return;
+
+        if (nodesData) {
+            nodesData.get().forEach(node => {
+                if (node.tasks && data[node.id]) {
+                    const updatedTasks = node.tasks.map((task, index) => {
+                        const savedVal = data[node.id][index];
+                        let newStatus = 'none';
+                        
+                        if (typeof savedVal === 'boolean') {
+                            newStatus = savedVal ? 'completed' : 'none';
+                        } else if (typeof savedVal === 'string') {
+                            newStatus = savedVal;
+                        }
+
+                        return {
+                            ...task,
+                            status: newStatus,
+                            completed: newStatus === 'completed'
+                        };
+                    });
+                    nodesData.update({ id: node.id, tasks: updatedTasks });
+                }
+            });
+            calculateTreeStatus();
+            if (selectedNodeId) updateSidePanel(nodesData.get(selectedNodeId));
+        }
+    }
+
+    async function saveToFirebase() {
+        if (!db) return;
+        const progress = {};
+        nodesData.get().forEach(node => {
+            if (node.tasks) progress[node.id] = node.tasks.map(t => t.status || 'none');
+        });
+        try {
+            await setDoc(doc(db, "students", studentId), { progress }, { merge: true });
+        } catch (error) {
+            console.error("Ошибка сохранения Firebase:", error);
+        }
+    }
+
+    function initGraph() {
+        const container = document.getElementById('network-container');
+        const data = { nodes: nodesData, edges: edgesData };
+
+        const options = {
+            nodes: {
+                shape: 'box', margin: { top: 12, bottom: 12, left: 16, right: 16 }, 
+                shapeProperties: { borderRadius: 6 }, borderWidth: 2, font: { face: 'Segoe UI', size: 14 }
+            },
+            edges: { width: 2, color: { color: '#444444', highlight: '#ffffff' }, smooth: false },
+            groups: {
+                completed: { color: { background: '#1a3320', border: '#4CAF50', highlight: { background: '#254a2e', border: '#66bb6a' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(76, 175, 80, 0.4)', size: 15, x: 0, y: 0 } },
+                in_progress: { color: { background: '#332a00', border: '#FFC107', highlight: { background: '#4d4000', border: '#ffca28' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(255, 193, 7, 0.15)', size: 10, x: 0, y: 0 } },
+                lost: { color: { background: '#3d1616', border: '#EF4444', highlight: { background: '#4d1c1c', border: '#f87171' } }, font: { color: '#ffffff' }, shadow: { enabled: true, color: 'rgba(239, 68, 68, 0.4)', size: 15, x: 0, y: 0 } },
+                locked: { color: { background: '#1e1e1e', border: '#333333', highlight: { background: '#2a2a2a', border: '#555555' } }, font: { color: '#777777' }, shadow: false }
+            },
+            physics: { forceAtlas2Based: { gravitationalConstant: -220, centralGravity: 0.005, springLength: 150, springConstant: 0.12 }, solver: 'forceAtlas2Based', stabilization: { iterations: 150 } }
+        };
+
+        network = new vis.Network(container, data, options);
+        calculateTreeStatus();
+
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                selectedNodeId = params.nodes[0];
+                const nodeData = nodesData.get(selectedNodeId);
+                if (nodeData.tasks || nodeData.group === 'lost' || nodeData.group === 'completed') {
+                    updateSidePanel(nodeData);
+                    document.getElementById('side-panel').classList.add('open');
+                } else {
+                    window.closePanel();
+                }
+            } else {
+                window.closePanel();
+            }
+        });
+    }
+
+    function calculateTreeStatus() {
+        const allEdges = edgesData.get();
+        const parentMap = {};
+        allEdges.forEach(e => {
+            if (!parentMap[e.from]) parentMap[e.from] = [];
+            parentMap[e.from].push(e.to);
+        });
+
+        function evalNode(nodeId) {
+            const children = parentMap[nodeId];
+            const node = nodesData.get(nodeId);
+            
+            if (!children || children.length === 0) {
+                if (node.tasks) {
+                    const total = node.tasks.length;
+                    const lostCount = node.tasks.filter(t => t.status === 'lost').length;
+                    const completedCount = node.tasks.filter(t => t.status === 'completed').length;
+                    
+                    let newGroup = 'locked';
+                    if (lostCount > 0) newGroup = 'lost';
+                    else if (completedCount === total && total > 0) newGroup = 'completed';
+                    else if (completedCount > 0) newGroup = 'in_progress';
+                    
+                    if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
+                }
+                return;
+            }
+
+            children.forEach(childId => evalNode(childId)); 
+
+            let allCompleted = true; 
+            let allLocked = true;
+            let anyLost = false;
+
+            children.forEach(childId => {
+                const childNode = nodesData.get(childId);
+                if (childNode.group === 'lost') anyLost = true;
+                if (childNode.group !== 'completed') allCompleted = false;
+                if (childNode.group !== 'locked') allLocked = false;
+            });
+
+            let newGroup = 'locked';
+            if (anyLost) newGroup = 'lost';
+            else if (allCompleted) newGroup = 'completed';
+            else if (!allLocked) newGroup = 'in_progress';
+
+            if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
+        }
+        
+        evalNode('math_ege'); 
+    }
+
+    window.handleTaskToggle = function(nodeId, taskIndex) {
+        if (!isAdmin) return;
+        const node = nodesData.get(nodeId);
+        if (!node || !node.tasks) return;
+
+        const task = node.tasks[taskIndex];
+        const states = ['none', 'completed', 'lost'];
+        const currentIndex = states.indexOf(task.status || 'none');
+        const nextState = states[(currentIndex + 1) % states.length];
+
+        const updatedTasks = node.tasks.map((t, idx) => {
+            if (idx === taskIndex) {
+                return { ...t, status: nextState, completed: nextState === 'completed' };
+            }
+            return t;
+        });
+
+        nodesData.update({ id: nodeId, tasks: updatedTasks });
+        
+        calculateTreeStatus();
+        updateSidePanel(nodesData.get(nodeId));
+        saveToFirebase();
+    };
+
+    function updateSidePanel(nodeData) {
+        const spTitle = document.getElementById('sp-title');
+        const spStatus = document.getElementById('sp-status');
+        const spDesc = document.getElementById('sp-desc');
+
+        spTitle.innerText = nodeData.label;
+        spStatus.className = 'panel-status';
+        
+        if (nodeData.group === 'completed') {
+            spStatus.innerText = 'Статус: Изучено'; spStatus.classList.add('status-completed');
+        } else if (nodeData.group === 'lost') {
+            spStatus.innerText = 'Статус: Проблемная тема'; spStatus.classList.add('status-lost');
+        } else if (nodeData.group === 'in_progress') {
+            spStatus.innerText = 'Статус: В процессе'; spStatus.classList.add('status-in_progress');
+        } else {
+            spStatus.innerText = 'Статус: Не изучалось'; spStatus.classList.add('status-locked');
+        }
+        
+        let descHtml = "";
+        if (nodeData.tasks) {
+            descHtml += '<ul class="task-list">';
+            nodeData.tasks.forEach((task, index) => {
+                const status = task.status || 'none';
+                const interactiveClass = isAdmin ? 'interactive' : '';
+                
+                let icon = '';
+                if (status === 'completed') icon = '✓';
+                else if (status === 'lost') icon = '✕';
+
+                descHtml += `
+                    <li class="task-item">
+                        <div class="task-label ${interactiveClass}" onclick="${interactiveClass ? `window.handleTaskToggle('${nodeData.id}', ${index})` : ''}">
+                            <div class="task-status-btn state-${status}">${icon}</div>
+                            <span class="task-text text-${status}">${task.text}</span>
+                        </div>
+                    </li>
+                `;
+            });
+            descHtml += '</ul>';
+        } else {
+            descHtml = "Родительский раздел. Статус вычисляется на основе дочерних тем.";
+        }
+        
+        spDesc.innerHTML = descHtml;
+        MathJax.typesetPromise([spDesc]).catch(err => console.error("MathJax Error:", err));
+    }
+
+    window.closePanel = function() {
+        document.getElementById('side-panel').classList.remove('open');
+        selectedNodeId = null;
+    }
+
+    initFirebase();
+</script>
+
+</body>
+</html>
