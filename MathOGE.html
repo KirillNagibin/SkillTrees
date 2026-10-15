@@ -13,9 +13,7 @@
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']]
             },
-            svg: {
-                fontCache: 'global'
-            }
+            svg: { fontCache: 'global' }
         };
     </script>
     <script type="text/javascript" id="MathJax-script" async
@@ -24,72 +22,35 @@
 
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: #121212;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            color: #fff;
+            overflow: hidden; color: #fff;
         }
-        #network-container {
-            width: 100%;
-            height: 100%;
-        }
+        #network-container { width: 100%; height: 100%; }
         #side-panel {
-            position: absolute;
-            top: 0;
-            right: -400px;
-            width: 350px;
-            height: 100%;
-            background-color: #1e1e1e;
-            color: #ffffff;
+            position: absolute; top: 0; right: -400px; width: 350px; height: 100%;
+            background-color: #1e1e1e; color: #ffffff;
             box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-            transition: right 0.3s ease;
-            padding: 20px;
-            box-sizing: border-box;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
+            transition: right 0.3s ease; padding: 20px; box-sizing: border-box;
+            z-index: 10; display: flex; flex-direction: column;
             border-left: 1px solid #333;
         }
-        #side-panel.open {
-            right: 0;
-        }
-        .panel-title {
-            font-size: 1.5em;
-            margin-top: 0;
-            margin-bottom: 5px;
-            color: #ffffff;
-            font-weight: 600;
-        }
+        #side-panel.open { right: 0; }
+        .panel-title { font-size: 1.5em; margin-top: 0; margin-bottom: 5px; color: #fff; font-weight: 600; }
         .panel-status {
-            font-size: 0.85em;
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            font-size: 0.85em; margin-bottom: 20px; font-weight: 600;
+            letter-spacing: 0.5px; text-transform: uppercase;
         }
         .panel-desc {
-            font-size: 0.95em;
-            line-height: 1.5;
-            color: #b0b0b0;
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 10px;
+            font-size: 0.95em; line-height: 1.5; color: #b0b0b0;
+            flex-grow: 1; overflow-y: auto; padding-right: 10px;
         }
         .panel-desc::-webkit-scrollbar { width: 4px; }
         .panel-desc::-webkit-scrollbar-thumb { background-color: #555; border-radius: 2px; }
         .close-btn {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 1.2em;
-            cursor: pointer;
-            position: absolute;
-            top: 15px;
-            right: 15px;
+            background: none; border: none; color: #888; font-size: 1.2em;
+            cursor: pointer; position: absolute; top: 15px; right: 15px;
             transition: color 0.2s;
         }
         .close-btn:hover { color: #fff; }
@@ -99,95 +60,53 @@
         .status-lost { color: #EF4444; }
         
         .task-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 15px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
+            list-style: none; padding: 0; margin-top: 15px;
+            border-top: 1px solid #333; padding-top: 20px;
         }
         .task-item { margin-bottom: 16px; }
-        
         .task-label {
-            display: flex;
-            align-items: flex-start;
-            font-size: 0.95em;
-            position: relative;
-            cursor: default;
+            display: flex; align-items: flex-start; font-size: 0.95em;
+            position: relative; cursor: default;
         }
         .task-label.interactive { cursor: pointer; }
-        
         .task-status-btn {
-            flex-shrink: 0;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #444;
-            border-radius: 4px;
-            margin-right: 12px;
-            margin-top: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.2s ease;
-            background-color: #2a2a2a;
+            flex-shrink: 0; width: 20px; height: 20px;
+            border: 2px solid #444; border-radius: 4px;
+            margin-right: 12px; margin-top: 2px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold;
+            transition: all 0.2s ease; background-color: #2a2a2a;
             user-select: none;
         }
         .task-label.interactive:hover .task-status-btn.state-none { border-color: #888; }
-        
-        .task-status-btn.state-completed {
-            background-color: #4CAF50;
-            border-color: #4CAF50;
-            color: white;
-        }
-        .task-status-btn.state-lost {
-            background-color: #EF4444;
-            border-color: #EF4444;
-            color: white;
-        }
-        
+        .task-status-btn.state-completed { background-color: #4CAF50; border-color: #4CAF50; color: white; }
+        .task-status-btn.state-lost { background-color: #EF4444; border-color: #EF4444; color: white; }
         .task-text {
-            line-height: 1.5;
-            display: inline;
-            word-break: break-word;
-            transition: color 0.2s;
+            line-height: 1.5; display: inline;
+            word-break: break-word; transition: color 0.2s;
         }
         .text-completed { color: #81c784; font-weight: 500; }
         .text-pending { color: #888888; }
         .text-lost { color: #EF4444; font-weight: 500; }
-        
         mjx-container[jax="SVG"] { color: inherit !important; }
 
         #admin-panel {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #1e1e1e;
-            border: 1px solid #4CAF50;
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 100;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: none; position: fixed; bottom: 20px; left: 20px;
+            background: #1e1e1e; border: 1px solid #4CAF50;
+            padding: 15px; border-radius: 8px; z-index: 100;
+            color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         #system-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-family: monospace;
-            font-size: 1.2em;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #121212; display: flex; justify-content: center;
+            align-items: center; z-index: 1000;
+            font-family: monospace; font-size: 1.2em;
         }
     </style>
 </head>
 <body>
 
 <div id="system-overlay">Инициализация...</div>
-
 <div id="network-container"></div>
 
 <div id="side-panel">
@@ -218,284 +137,276 @@
     };
 
     const SYLLABUS_DATA = {
-    "nodes": [
-        { "id": "math_oge", "label": "Математика ОГЭ", "group": "locked", "font": { "size": 20 } },
-        
-        { "id": "num_branch", "label": "Числа и вычисления", "group": "locked" },
-        { "id": "alg_expr_branch", "label": "Алгебраические выражения", "group": "locked" },
-        { "id": "eq_branch", "label": "Уравнения и неравенства", "group": "locked" },
-        { "id": "seq_branch", "label": "Числовые последовательности", "group": "locked" },
-        { "id": "func_branch", "label": "Функции", "group": "locked" },
-        { "id": "coord_branch", "label": "Координаты на прямой и плоскости", "group": "locked" },
-        { "id": "geo_branch", "label": "Геометрия", "group": "locked" },
-        { "id": "prob_stat_branch", "label": "Вероятность и статистика", "group": "locked" },
-        
-        // --- ЧИСЛА И ВЫЧИСЛЕНИЯ ---
-        {
-            "id": "num_actions", "label": "Действия с числами", "group": "locked",
-            "tasks": [
-                { "text": "Натуральные, целые, рациональные, действительные числа", "completed": false },
-                { "text": "Арифметические действия, порядок действий", "completed": false },
-                { "text": "Сравнение чисел на координатной прямой", "completed": false }
-            ]
-        },
-        {
-            "id": "num_fractions", "label": "Дроби и проценты", "group": "locked",
-            "tasks": [
-                { "text": "Обыкновенные и десятичные дроби", "completed": false },
-                { "text": "Проценты, задачи на проценты", "completed": false },
-                { "text": "Пропорции, основное свойство пропорции", "completed": false },
-                { "text": "Отношения, масштаб", "completed": false }
-            ]
-        },
-        {
-            "id": "num_powers_roots", "label": "Степени и корни", "group": "locked",
-            "tasks": [
-                { "text": "Свойства степени с целым показателем", "completed": false },
-                { "text": "Арифметический квадратный корень", "completed": false },
-                { "text": "Свойства корней, вынесение множителя", "completed": false }
-            ]
-        },
-        {
-            "id": "num_estimations", "label": "Оценка и прикидка", "group": "locked",
-            "tasks": [
-                { "text": "Округление чисел", "completed": false },
-                { "text": "Прикидка и оценка результатов вычислений", "completed": false },
-                { "text": "Нахождение значений выражений", "completed": false }
-            ]
-        },
+        "nodes": [
+            { "id": "math_oge", "label": "Математика ОГЭ", "group": "locked", "font": { "size": 20 } },
+            
+            { "id": "num_branch", "label": "Числа и вычисления", "group": "locked" },
+            { "id": "alg_expr_branch", "label": "Алгебраические выражения", "group": "locked" },
+            { "id": "eq_branch", "label": "Уравнения и неравенства", "group": "locked" },
+            { "id": "seq_branch", "label": "Числовые последовательности", "group": "locked" },
+            { "id": "func_branch", "label": "Функции", "group": "locked" },
+            { "id": "coord_branch", "label": "Координаты на прямой и плоскости", "group": "locked" },
+            { "id": "geo_branch", "label": "Геометрия", "group": "locked" },
+            
+            // --- ЧИСЛА И ВЫЧИСЛЕНИЯ ---
+            {
+                "id": "num_actions", "label": "Действия с числами", "group": "locked",
+                "tasks": [
+                    { "text": "Натуральные, целые, рациональные, действительные числа", "completed": false },
+                    { "text": "Арифметические действия, порядок действий", "completed": false },
+                    { "text": "Сравнение чисел на координатной прямой", "completed": false }
+                ]
+            },
+            {
+                "id": "num_fractions", "label": "Дроби и проценты", "group": "locked",
+                "tasks": [
+                    { "text": "Обыкновенные и десятичные дроби", "completed": false },
+                    { "text": "Проценты, задачи на проценты", "completed": false },
+                    { "text": "Пропорции, основное свойство пропорции", "completed": false },
+                    { "text": "Отношения, масштаб", "completed": false }
+                ]
+            },
+            {
+                "id": "num_powers_roots", "label": "Степени и корни", "group": "locked",
+                "tasks": [
+                    { "text": "Свойства степени с целым показателем", "completed": false },
+                    { "text": "Арифметический квадратный корень", "completed": false },
+                    { "text": "Свойства корней, вынесение множителя", "completed": false }
+                ]
+            },
+            {
+                "id": "num_estimations", "label": "Оценка и прикидка", "group": "locked",
+                "tasks": [
+                    { "text": "Округление чисел", "completed": false },
+                    { "text": "Прикидка и оценка результатов вычислений", "completed": false },
+                    { "text": "Нахождение значений выражений", "completed": false }
+                ]
+            },
+            {
+                "id": "prob_classical", "label": "Вероятность", "group": "locked",
+                "tasks": [
+                    { "text": "Классическое определение вероятности", "completed": false },
+                    { "text": "Вероятность противоположного события", "completed": false },
+                    { "text": "Правило умножения и сложения (комбинаторика)", "completed": false },
+                    { "text": "Решение задач на вероятность", "completed": false }
+                ]
+            },
 
-        // --- АЛГЕБРАИЧЕСКИЕ ВЫРАЖЕНИЯ ---
-        {
-            "id": "alg_expr_transform", "label": "Преобразование выражений", "group": "locked",
-            "tasks": [
-                { "text": "Формулы сокращенного умножения", "completed": false },
-                { "text": "Разложение на множители", "completed": false },
-                { "text": "Сокращение дробей", "completed": false }
-            ]
-        },
-        {
-            "id": "alg_expr_irr", "label": "Иррациональные выражения", "group": "locked",
-            "tasks": [
-                { "text": "Преобразование выражений с корнями", "completed": false },
-                { "text": "Освобождение от иррациональности в знаменателе", "completed": false }
-            ]
-        },
+            // --- АЛГЕБРАИЧЕСКИЕ ВЫРАЖЕНИЯ ---
+            {
+                "id": "alg_expr_transform", "label": "Преобразование выражений", "group": "locked",
+                "tasks": [
+                    { "text": "Формулы сокращенного умножения", "completed": false },
+                    { "text": "Разложение на множители", "completed": false },
+                    { "text": "Сокращение дробей", "completed": false }
+                ]
+            },
+            {
+                "id": "alg_expr_irr", "label": "Иррациональные выражения", "group": "locked",
+                "tasks": [
+                    { "text": "Преобразование выражений с корнями", "completed": false },
+                    { "text": "Освобождение от иррациональности в знаменателе", "completed": false }
+                ]
+            },
 
-        // --- УРАВНЕНИЯ И НЕРАВЕНСТВА ---
-        {
-            "id": "eq_linear_quad", "label": "Линейные и квадратные уравнения", "group": "locked",
-            "tasks": [
-                { "text": "Линейные уравнения", "completed": false },
-                { "text": "Квадратные уравнения: формулы корней", "completed": false },
-                { "text": "Теорема Виета", "completed": false },
-                { "text": "Рациональные уравнения", "completed": false }
-            ]
-        },
-        {
-            "id": "eq_systems", "label": "Системы уравнений", "group": "locked",
-            "tasks": [
-                { "text": "Системы линейных уравнений", "completed": false },
-                { "text": "Системы с нелинейными уравнениями", "completed": false },
-                { "text": "Метод подстановки и сложения", "completed": false }
-            ]
-        },
-        {
-            "id": "eq_inequalities", "label": "Неравенства и системы неравенств", "group": "locked",
-            "tasks": [
-                { "text": "Линейные неравенства", "completed": false },
-                { "text": "Квадратные неравенства (метод интервалов)", "completed": false },
-                { "text": "Системы неравенств", "completed": false },
-                { "text": "Рациональные неравенства", "completed": false }
-            ]
-        },
-        {
-            "id": "eq_text", "label": "Текстовые задачи", "group": "locked",
-            "tasks": [
-                { "text": "Задачи на движение", "completed": false },
-                { "text": "Задачи на работу", "completed": false },
-                { "text": "Задачи на проценты, сплавы, смеси", "completed": false },
-                { "text": "Задачи на составление уравнений", "completed": false }
-            ]
-        },
+            // --- УРАВНЕНИЯ И НЕРАВЕНСТВА ---
+            {
+                "id": "eq_linear_quad", "label": "Линейные и квадратные уравнения", "group": "locked",
+                "tasks": [
+                    { "text": "Линейные уравнения", "completed": false },
+                    { "text": "Квадратные уравнения: формулы корней", "completed": false },
+                    { "text": "Теорема Виета", "completed": false },
+                    { "text": "Рациональные уравнения", "completed": false }
+                ]
+            },
+            {
+                "id": "eq_systems", "label": "Системы уравнений", "group": "locked",
+                "tasks": [
+                    { "text": "Системы линейных уравнений", "completed": false },
+                    { "text": "Системы с нелинейными уравнениями", "completed": false },
+                    { "text": "Метод подстановки и сложения", "completed": false }
+                ]
+            },
+            {
+                "id": "eq_inequalities", "label": "Неравенства и системы неравенств", "group": "locked",
+                "tasks": [
+                    { "text": "Линейные неравенства", "completed": false },
+                    { "text": "Квадратные неравенства (метод интервалов)", "completed": false },
+                    { "text": "Системы неравенств", "completed": false },
+                    { "text": "Рациональные неравенства", "completed": false }
+                ]
+            },
+            {
+                "id": "eq_text", "label": "Текстовые задачи", "group": "locked",
+                "tasks": [
+                    { "text": "Задачи на движение", "completed": false },
+                    { "text": "Задачи на работу", "completed": false },
+                    { "text": "Задачи на проценты, сплавы, смеси", "completed": false },
+                    { "text": "Задачи на составление уравнений", "completed": false }
+                ]
+            },
+            {
+                "id": "prob_practical", "label": "Практико-ориентированные задачи", "group": "locked",
+                "tasks": [
+                    { "text": "Задачи с «жизненным» контекстом (оплата, скидки, налоги)", "completed": false },
+                    { "text": "Чтение и анализ реальных данных (таблицы, графики)", "completed": false },
+                    { "text": "Задачи на оптимизацию и выбор", "completed": false }
+                ]
+            },
 
-        // --- ЧИСЛОВЫЕ ПОСЛЕДОВАТЕЛЬНОСТИ ---
-        {
-            "id": "seq_progressions", "label": "Прогрессии", "group": "locked",
-            "tasks": [
-                { "text": "Арифметическая прогрессия", "completed": false },
-                { "text": "Геометрическая прогрессия", "completed": false },
-                { "text": "Формулы n-го члена и суммы", "completed": false }
-            ]
-        },
-        {
-            "id": "seq_patterns", "label": "Последовательности и закономерности", "group": "locked",
-            "tasks": [
-                { "text": "Числовые последовательности, способы задания", "completed": false },
-                { "text": "Нахождение закономерностей", "completed": false }
-            ]
-        },
+            // --- ЧИСЛОВЫЕ ПОСЛЕДОВАТЕЛЬНОСТИ ---
+            {
+                "id": "seq_progressions", "label": "Прогрессии", "group": "locked",
+                "tasks": [
+                    { "text": "Арифметическая прогрессия", "completed": false },
+                    { "text": "Геометрическая прогрессия", "completed": false },
+                    { "text": "Формулы n-го члена и суммы", "completed": false }
+                ]
+            },
+            {
+                "id": "seq_patterns", "label": "Последовательности и закономерности", "group": "locked",
+                "tasks": [
+                    { "text": "Числовые последовательности, способы задания", "completed": false },
+                    { "text": "Нахождение закономерностей", "completed": false }
+                ]
+            },
 
-        // --- ФУНКЦИИ ---
-        {
-            "id": "func_basics", "label": "Основные понятия", "group": "locked",
-            "tasks": [
-                { "text": "Понятие функции, область определения, множество значений", "completed": false },
-                { "text": "Способы задания функции", "completed": false },
-                { "text": "Свойства функций", "completed": false }
-            ]
-        },
-        {
-            "id": "func_graphs", "label": "Графики функций", "group": "locked",
-            "tasks": [
-                { "text": "Линейная функция, ее график", "completed": false },
-                { "text": "Квадратичная функция, парабола", "completed": false },
-                { "text": "Обратная пропорциональность, гипербола", "completed": false },
-                { "text": "Функция квадратного корня", "completed": false },
-                { "text": "Кусочно-заданные функции", "completed": false }
-            ]
-        },
-        {
-            "id": "func_reading", "label": "Чтение и анализ графиков", "group": "locked",
-            "tasks": [
-                { "text": "Определение свойств функции по графику", "completed": false },
-                { "text": "Нахождение значений функции по графику", "completed": false },
-                { "text": "Анализ реальных зависимостей (графики)", "completed": false }
-            ]
-        },
+            // --- ФУНКЦИИ ---
+            {
+                "id": "func_basics", "label": "Основные понятия", "group": "locked",
+                "tasks": [
+                    { "text": "Понятие функции, область определения, множество значений", "completed": false },
+                    { "text": "Способы задания функции", "completed": false },
+                    { "text": "Свойства функций", "completed": false }
+                ]
+            },
+            {
+                "id": "func_graphs", "label": "Графики функций", "group": "locked",
+                "tasks": [
+                    { "text": "Линейная функция, ее график", "completed": false },
+                    { "text": "Квадратичная функция, парабола", "completed": false },
+                    { "text": "Обратная пропорциональность, гипербола", "completed": false },
+                    { "text": "Функция квадратного корня", "completed": false },
+                    { "text": "Кусочно-заданные функции", "completed": false }
+                ]
+            },
+            {
+                "id": "func_reading", "label": "Чтение и анализ графиков", "group": "locked",
+                "tasks": [
+                    { "text": "Определение свойств функции по графику", "completed": false },
+                    { "text": "Нахождение значений функции по графику", "completed": false },
+                    { "text": "Анализ реальных зависимостей (графики)", "completed": false }
+                ]
+            },
 
-        // --- КООРДИНАТЫ НА ПРЯМОЙ И ПЛОСКОСТИ ---
-        {
-            "id": "coord_line", "label": "Координатная прямая", "group": "locked",
-            "tasks": [
-                { "text": "Координаты на прямой", "completed": false },
-                { "text": "Расстояние между точками", "completed": false },
-                { "text": "Числовые промежутки", "completed": false }
-            ]
-        },
-        {
-            "id": "coord_plane", "label": "Координатная плоскость", "group": "locked",
-            "tasks": [
-                { "text": "Координаты точки на плоскости", "completed": false },
-                { "text": "Уравнение прямой, угловой коэффициент", "completed": false },
-                { "text": "Графическая интерпретация уравнений и неравенств", "completed": false }
-            ]
-        },
+            // --- КООРДИНАТЫ НА ПРЯМОЙ И ПЛОСКОСТИ ---
+            {
+                "id": "coord_line", "label": "Координатная прямая", "group": "locked",
+                "tasks": [
+                    { "text": "Координаты на прямой", "completed": false },
+                    { "text": "Расстояние между точками", "completed": false },
+                    { "text": "Числовые промежутки", "completed": false }
+                ]
+            },
+            {
+                "id": "coord_plane", "label": "Координатная плоскость", "group": "locked",
+                "tasks": [
+                    { "text": "Координаты точки на плоскости", "completed": false },
+                    { "text": "Уравнение прямой, угловой коэффициент", "completed": false },
+                    { "text": "Графическая интерпретация уравнений и неравенств", "completed": false }
+                ]
+            },
 
-        // --- ГЕОМЕТРИЯ ---
-        {
-            "id": "geo_plan_figures", "label": "Планиметрические фигуры", "group": "locked",
-            "tasks": [
-                { "text": "Треугольники: виды, элементы, свойства", "completed": false },
-                { "text": "Четырехугольники: параллелограмм, трапеция, прямоугольник, ромб, квадрат", "completed": false },
-                { "text": "Окружность и круг: элементы, свойства", "completed": false },
-                { "text": "Вписанные и описанные фигуры", "completed": false }
-            ]
-        },
-        {
-            "id": "geo_plan_measures", "label": "Измерения на плоскости", "group": "locked",
-            "tasks": [
-                { "text": "Площади фигур", "completed": false },
-                { "text": "Теорема Пифагора", "completed": false },
-                { "text": "Теоремы синусов и косинусов", "completed": false },
-                { "text": "Подобие фигур", "completed": false }
-            ]
-        },
-        {
-            "id": "geo_vectors", "label": "Векторы и координаты на плоскости", "group": "locked",
-            "tasks": [
-                { "text": "Векторы: понятие, действия", "completed": false },
-                { "text": "Скалярное произведение векторов", "completed": false },
-                { "text": "Применение векторов и координат к решению задач", "completed": false }
-            ]
-        },
-        {
-            "id": "geo_geometry_tasks", "label": "Решение геометрических задач", "group": "locked",
-            "tasks": [
-                { "text": "Нахождение геометрических величин (длин, углов, площадей)", "completed": false },
-                { "text": "Доказательство геометрических фактов", "completed": false },
-                { "text": "Практические задачи с геометрическим содержанием", "completed": false }
-            ]
-        },
+            // --- ГЕОМЕТРИЯ ---
+            {
+                "id": "geo_plan_figures", "label": "Планиметрические фигуры", "group": "locked",
+                "tasks": [
+                    { "text": "Треугольники: виды, элементы, свойства", "completed": false },
+                    { "text": "Четырехугольники: параллелограмм, трапеция, прямоугольник, ромб, квадрат", "completed": false },
+                    { "text": "Окружность и круг: элементы, свойства", "completed": false },
+                    { "text": "Вписанные и описанные фигуры", "completed": false }
+                ]
+            },
+            {
+                "id": "geo_plan_measures", "label": "Измерения на плоскости", "group": "locked",
+                "tasks": [
+                    { "text": "Площади фигур", "completed": false },
+                    { "text": "Теорема Пифагора", "completed": false },
+                    { "text": "Теоремы синусов и косинусов", "completed": false },
+                    { "text": "Подобие фигур", "completed": false }
+                ]
+            },
+            {
+                "id": "geo_vectors", "label": "Векторы и координаты на плоскости", "group": "locked",
+                "tasks": [
+                    { "text": "Векторы: понятие, действия", "completed": false },
+                    { "text": "Скалярное произведение векторов", "completed": false },
+                    { "text": "Применение векторов и координат к решению задач", "completed": false }
+                ]
+            },
+            {
+                "id": "geo_geometry_tasks", "label": "Решение геометрических задач", "group": "locked",
+                "tasks": [
+                    { "text": "Нахождение геометрических величин (длин, углов, площадей)", "completed": false },
+                    { "text": "Доказательство геометрических фактов", "completed": false },
+                    { "text": "Практические задачи с геометрическим содержанием", "completed": false }
+                ]
+            }
+        ],
+        "edges": [
+            { "from": "math_oge", "to": "num_branch", "length": 250 },
+            { "from": "math_oge", "to": "alg_expr_branch", "length": 250 },
+            { "from": "math_oge", "to": "eq_branch", "length": 250 },
+            { "from": "math_oge", "to": "seq_branch", "length": 250 },
+            { "from": "math_oge", "to": "func_branch", "length": 250 },
+            { "from": "math_oge", "to": "coord_branch", "length": 250 },
+            { "from": "math_oge", "to": "geo_branch", "length": 250 },
 
-        // --- ВЕРОЯТНОСТЬ И СТАТИСТИКА ---
-        {
-            "id": "prob_classical", "label": "Вероятность", "group": "locked",
-            "tasks": [
-                { "text": "Классическое определение вероятности", "completed": false },
-                { "text": "Вероятность противоположного события", "completed": false },
-                { "text": "Решение задач на вероятность", "completed": false }
-            ]
-        },
-        {
-            "id": "stat_data", "label": "Статистика и анализ данных", "group": "locked",
-            "tasks": [
-                { "text": "Представление данных: таблицы, диаграммы, графики", "completed": false },
-                { "text": "Среднее арифметическое, медиана, мода, размах", "completed": false },
-                { "text": "Анализ и интерпретация данных", "completed": false },
-                { "text": "Множества и графы (новое в 2026)", "completed": false }
-            ]
-        },
-        {
-            "id": "prob_practical", "label": "Практико-ориентированные задачи", "group": "locked",
-            "tasks": [
-                { "text": "Задачи с «жизненным» контекстом (оплата, скидки, налоги)", "completed": false },
-                { "text": "Чтение и анализ реальных данных (таблицы, графики)", "completed": false },
-                { "text": "Задачи на оптимизацию и выбор", "completed": false }
-            ]
-        }
-    ],
-    "edges": [
-        { "from": "math_oge", "to": "num_branch", "length": 250 },
-        { "from": "math_oge", "to": "alg_expr_branch", "length": 250 },
-        { "from": "math_oge", "to": "eq_branch", "length": 250 },
-        { "from": "math_oge", "to": "seq_branch", "length": 250 },
-        { "from": "math_oge", "to": "func_branch", "length": 250 },
-        { "from": "math_oge", "to": "coord_branch", "length": 250 },
-        { "from": "math_oge", "to": "geo_branch", "length": 250 },
-        { "from": "math_oge", "to": "prob_stat_branch", "length": 250 },
+            // Числа и вычисления (с вероятностью)
+            { "from": "num_branch", "to": "num_actions", "length": 150 },
+            { "from": "num_branch", "to": "num_fractions", "length": 150 },
+            { "from": "num_branch", "to": "num_powers_roots", "length": 150 },
+            { "from": "num_branch", "to": "num_estimations", "length": 150 },
+            { "from": "num_branch", "to": "prob_classical", "length": 150 },
 
-        // Числа и вычисления
-        { "from": "num_branch", "to": "num_actions", "length": 150 },
-        { "from": "num_branch", "to": "num_fractions", "length": 150 },
-        { "from": "num_branch", "to": "num_powers_roots", "length": 150 },
-        { "from": "num_branch", "to": "num_estimations", "length": 150 },
+            // Алгебраические выражения
+            { "from": "alg_expr_branch", "to": "alg_expr_transform", "length": 150 },
+            { "from": "alg_expr_branch", "to": "alg_expr_irr", "length": 150 },
 
-        // Алгебраические выражения
-        { "from": "alg_expr_branch", "to": "alg_expr_transform", "length": 150 },
-        { "from": "alg_expr_branch", "to": "alg_expr_irr", "length": 150 },
+            // Уравнения и неравенства (с практико-ориентированными задачами)
+            { "from": "eq_branch", "to": "eq_linear_quad", "length": 150 },
+            { "from": "eq_branch", "to": "eq_systems", "length": 150 },
+            { "from": "eq_branch", "to": "eq_inequalities", "length": 150 },
+            { "from": "eq_branch", "to": "eq_text", "length": 150 },
+            { "from": "eq_branch", "to": "prob_practical", "length": 150 },
 
-        // Уравнения и неравенства
-        { "from": "eq_branch", "to": "eq_linear_quad", "length": 150 },
-        { "from": "eq_branch", "to": "eq_systems", "length": 150 },
-        { "from": "eq_branch", "to": "eq_inequalities", "length": 150 },
-        { "from": "eq_branch", "to": "eq_text", "length": 150 },
+            // Числовые последовательности
+            { "from": "seq_branch", "to": "seq_progressions", "length": 150 },
+            { "from": "seq_branch", "to": "seq_patterns", "length": 150 },
 
-        // Числовые последовательности
-        { "from": "seq_branch", "to": "seq_progressions", "length": 150 },
-        { "from": "seq_branch", "to": "seq_patterns", "length": 150 },
+            // Функции
+            { "from": "func_branch", "to": "func_basics", "length": 150 },
+            { "from": "func_branch", "to": "func_graphs", "length": 150 },
+            { "from": "func_branch", "to": "func_reading", "length": 150 },
 
-        // Функции
-        { "from": "func_branch", "to": "func_basics", "length": 150 },
-        { "from": "func_branch", "to": "func_graphs", "length": 150 },
-        { "from": "func_branch", "to": "func_reading", "length": 150 },
+            // Координаты
+            { "from": "coord_branch", "to": "coord_line", "length": 150 },
+            { "from": "coord_branch", "to": "coord_plane", "length": 150 },
 
-        // Координаты
-        { "from": "coord_branch", "to": "coord_line", "length": 150 },
-        { "from": "coord_branch", "to": "coord_plane", "length": 150 },
+            // Геометрия
+            { "from": "geo_branch", "to": "geo_plan_figures", "length": 150 },
+            { "from": "geo_branch", "to": "geo_plan_measures", "length": 150 },
+            { "from": "geo_branch", "to": "geo_vectors", "length": 150 },
+            { "from": "geo_branch", "to": "geo_geometry_tasks", "length": 150 }
+        ]
+    };
 
-        // Геометрия
-        { "from": "geo_branch", "to": "geo_plan_figures", "length": 150 },
-        { "from": "geo_branch", "to": "geo_plan_measures", "length": 150 },
-        { "from": "geo_branch", "to": "geo_vectors", "length": 150 },
-        { "from": "geo_branch", "to": "geo_geometry_tasks", "length": 150 },
-
-        // Вероятность и статистика
-        { "from": "prob_stat_branch", "to": "prob_classical", "length": 150 },
-        { "from": "prob_stat_branch", "to": "stat_data", "length": 150 },
-        { "from": "prob_stat_branch", "to": "prob_practical", "length": 150 }
-    ]
-};
+    // === Корневой узел определяется автоматически по отсутствию входящих рёбер ===
+    const ROOT_NODE_ID = (() => {
+        const targets = new Set(SYLLABUS_DATA.edges.map(e => e.to));
+        const root = SYLLABUS_DATA.nodes.find(n => !targets.has(n.id));
+        return root ? root.id : SYLLABUS_DATA.nodes[0].id;
+    })();
 
     let db;
     let nodesData = new vis.DataSet(SYLLABUS_DATA.nodes);
@@ -508,7 +419,7 @@
     let isAdmin = urlParams.get('admin') === 'true';
 
     if (!studentId) {
-        studentId = 'demo_student_math';
+        studentId = 'demo_student_oge_math';
         isAdmin = true;
     }
 
@@ -543,9 +454,7 @@
                     saveToFirebase();
                 }
                 
-                if (!network) {
-                    initGraph();
-                }
+                if (!network) initGraph();
                 overlay.style.display = 'none';
             }, (error) => {
                 console.error("Ошибка Firebase Snapshot:", error);
@@ -574,11 +483,7 @@
                             newStatus = savedVal;
                         }
 
-                        return {
-                            ...task,
-                            status: newStatus,
-                            completed: newStatus === 'completed'
-                        };
+                        return { ...task, status: newStatus, completed: newStatus === 'completed' };
                     });
                     nodesData.update({ id: node.id, tasks: updatedTasks });
                 }
@@ -688,7 +593,7 @@
             if (node.group !== newGroup) nodesData.update({ id: nodeId, group: newGroup });
         }
         
-        evalNode('math_ege'); 
+        evalNode(ROOT_NODE_ID); 
     }
 
     window.handleTaskToggle = function(nodeId, taskIndex) {
